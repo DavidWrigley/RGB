@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+
+var mqtt = require('../lib/mqtt');
+
+var fs = require('fs');
+
+var argv = process.argv;
+
+for (var i = 2; i <= 4; i++) {
+  if(!argv[i]) process.exit(-1);
+}
+
+var port = argv[2]
+  , host = argv[3]
+  , topic = argv[4];
+
+
+var startTime = new Date().getTime();
+
+mqtt.createClient(port, host, function(err, client) {
+  if (err) {
+    console.log("Unable to connect to broker");
+    process.exit(1);
+  }
+  client.connect({keepalive: 3000});
+
+  client.on('connack', function(packet) {
+    if (packet.returnCode === 0) {
+        client.subscribe({topic: topic});
+    } else {
+      console.log('connack error %d', packet.returnCode);
+      process.exit(-1);
+    }
+  });
+
+  client.on('publish', function(packet) {
+    console.log('%s\t%s', packet.topic, packet.payload);
+    var data = JSON.parse(packet.payload);
+
+    if (data.macSrc == "44:4c:0c:c2:ad:28") {
+      
+      var log = fs.createWriteStream("./log/" + data.macSrc + "_" + data.node_id + ".txt", {'flags': 'a'});
+      var timelog = fs.createWriteStream("./log/" + data.macSrc + "_" + data.node_id + "timestamps.txt", {'flags': 'a'});
+      
+      log.write(data.rssi + "\n"); 
+      timelog.write( (new Date().getTime() - startTime) + "\n");
+      log.end();
+      timelog.end();
+
+    }
+
+  });
+
+  client.on('close', function() {
+    process.exit(0);
+  });
+
+  client.on('error', function(e) {
+    console.log('error %s', e);
+    process.exit(-1);
+  });
+});

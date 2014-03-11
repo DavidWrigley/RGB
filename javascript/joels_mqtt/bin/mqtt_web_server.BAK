@@ -1,0 +1,217 @@
+#!/usr/bin/env node
+
+var mqtt = require('../lib/mqtt')
+, app = require('http').createServer(handler)
+, io = require('socket.io').listen(app)
+, xml2js = require('xml2js')
+, parser = new xml2js.Parser()
+, fs = require('fs')
+, url = require("url")
+, Db = require('mongodb').Db
+, Connection = require('mongodb').Connection
+, Server = require('mongodb').Server;
+
+var argv = process.argv;
+
+for (var i = 2; i <= 4; i++) {
+	if(!argv[i]) process.exit(-1);
+}
+
+var port = argv[2]
+, host = argv[3]
+, topic = argv[4];
+
+//constants.
+var NUM_NODES = 3;
+var NUM_SAMPLES = 20;
+
+//global variables.
+var receivedPackets = new Array();
+var currentPacket;
+var startFingerprinting = false;
+var fingRssiAvg = new Object();
+var fingRssiCnt = new Object();
+var fingBuilding = '17';
+var fingRoom = 'ceit';
+var fingX = 0;
+var fingY = 0;
+var fingMac = '44:4c:0c:c2:ad:28';
+var cntFingDone = 0;
+
+//socket globals
+var iosocket;
+
+//######################################################################
+//HTTP Server Code.
+
+// creating the server ( localhost:8000 ) 
+app.listen(8000);
+
+// on server started we can load our client.html page
+function handler ( req, res ) {
+
+	var pathname = url.parse(req.url).pathname;
+	console.log("Request for " + pathname + " received.");
+
+	if (pathname === '/') {
+		pathname = '/client2.html';
+	}
+
+	fs.readFile( __dirname + pathname ,
+		function ( err, data ) {
+			if ( err ) {
+				console.log( err );
+				res.writeHead(500);
+				return res.end( 'Error loading.' );
+			}
+			res.writeHead( 200 );
+			res.end( data );
+		});
+};
+
+function getFingerprintingPercentageDone (numSamples, arrayCnt) {
+
+	var percDone = ""
+			
+	for (var nodeId in arrayCnt) {
+
+		if ((arrayCnt[nodeId] / numSamples) * 100 < 100)
+			percDone += nodeId + ": " + Math.round( (arrayCnt[nodeId] / numSamples) * 100 ) + " ";
+		else 
+			percDone += nodeId + ": 100 ";
+
+		console.log("percDone[nodeId] = %d", percDone);
+	}
+
+	return percDone;
+}
+
+//######################################################################
+//io Socket Code.
+// creating a new websocket to keep the content updated without any AJAX request
+
+io.sockets.on( 'connection', function ( socket ) {
+
+	iosocket = socket;
+
+	// watching the dat file
+	fs.watch( 'example.dat', function ( curr, prev ) {
+		// on file change we can read the new dat
+		fs.readFile( 'example.dat', function ( err, data ) {
+			if ( err ) throw err;
+			// parsing the new xml datas and converting them into json file
+			//parser.parseString( data );
+			socket.volatile.emit( 'notification' , 'hi' );
+
+		});
+	});
+
+	socket.on('startFingerprinting', function (data) {
+
+        startFingerprinting = true;
+       	
+       	fingBuilding = data.building;
+       	fingRoom = data.room;
+       	fingMac = data.mac;
+		fingX = data.x;
+		fingY = data.y;
+
+        console.log('Starting a Fingerprinting session.. building:%s, room:%s, mac:%s, x:%d, y:%d', 
+        	data.building, data.room, data.mac, data.x, data.y);
+    });
+});
+
+//######################################################################
+//Database Code.
+
+var clientdb = new Db('test', new Server("127.0.0.1", 27017, {}));
+var instClientdb;
+
+
+clientdb.open(function(err, p_clientdb) {
+	instClientdb = p_clientdb;
+});
+
+
+//######################################################################
+//MQTT Code.
+mqtt.createClient(port, host, function(err, client) {
+	if (err) {
+		console.log("Unable to connect to broker");
+		process.exit(1);
+	}
+	client.connect({keepalive: 3000});
+
+	client.on('connack', function(packet) {
+		if (packet.returnCode === 0) {
+			client.subscribe({topic: topic});
+		} else {
+			console.log('connack error %d', packet.returnCode);
+			process.exit(-1);
+		}
+	});
+
+	client.on('publish', function(packet) {
+		console.log('%s\t%s', packet.topic, packet.payload);
+		var ob = JSON.parse(packet.payload);
+		currentPacket = ob;
+		receivedPackets[receivedPackets.length] = ob;
+
+		console.log('rssi is:%d, MAC is %s', ob.rssi, ob.macSrc);
+		console.log('estimated distance is: %d', ( currentPacket.rssi*(-3/8) - 15.5 ) );
+
+		if (startFingerprinting == true && ob.macSrc == fingMac) {
+
+			if (fingRssiAvg[ob.node_id] == null) {
+				fingRssiAvg[ob.node_id] = ob.rssi;
+				fingRssiCnt[ob.node_id] = 1;
+			}
+			else {
+				fingRssiAvg[ob.node_id] = (fingRssiAvg[ob.node_id] * fingRssiCnt[ob.node_id] + ob.rssi) / (fingRssiCnt[ob.node_id] + 1);
+
+				console.log('cumu avg for %s is : %d (cnt is: %d', ob.node_id, fingRssiAvg[ob.node_id], fingRssiCnt[ob.node_id]);
+			}
+
+			iosocket.emit('updateFingerprinting', getFingerprintingPercentageDone(NUM_SAMPLES, fingRssiCnt) );
+
+			if (fingRssiCnt[ob.node_id]++ == NUM_SAMPLES) {
+
+				cntFingDone++;
+			}
+
+			if (cntFingDone == NUM_NODES) {
+				startFingerprinting = false;
+				cntFingDone = 0;
+
+				var dbEntry = {
+					building : fingBuilding,
+					room : fingRoom,
+					mac : fingMac,
+					x: fingX, 
+					y: fingY, 
+					rssi: fingRssiAvg
+				}
+
+				instClientdb.collection('stuff', function(err, collection) {
+
+					collection.insert(dbEntry);
+				});
+			}
+		}
+
+		//testCollection.insert(ob);
+
+	});
+
+client.on('close', function() {
+	process.exit(0);
+});
+
+client.on('error', function(e) {
+	console.log('error %s', e);
+	process.exit(-1);
+});
+});
+
+
+

@@ -1,0 +1,81 @@
+<html>
+<head>
+<style type="text/css">
+
+element {
+	background-color: #b9ff30;
+	color: #9c2fff;
+	font-variant: normal;
+	font-style: italic;
+	font-size: 15pt;
+	font-family: sans-serif;
+}
+
+</style>
+<!-- 
+* Author:      Gianluca Guarini
+* Contact:     gianluca.guarini@gmail.com
+* Website:     http://www.gianlucaguarini.com/
+* Twitter:     @gianlucaguarini
+-->
+<title>Fingerprinter</title>
+</head>
+
+<style>
+#heatmapArea {
+    position:relative;
+    float:left;
+    width:600px;
+    height:400px;
+    background-image:url(http://www.patrick-wied.at/static/heatmapjs/demo/realtime_heatmap/graphic.png);
+    border:1px dashed black;
+}
+</style>
+
+<body>
+
+
+
+<div id="heatmapArea">
+        
+</div>
+<div id="container">Try to change your xml data to update this content</div>
+
+<script src="socket.io/lib/socket.io.js"></script>
+<script>
+    /*
+    // creating a new websocket
+    
+    // on every message recived we print the new datas inside the #container div
+    socket.on('notification', function (data) {
+        $('#container').html(data);
+        $('time').html('Last Update:' + data.time);
+    });
+    */
+    //var socket = io.connect('http://localhost');
+
+    function startFingerprinting()
+    {
+        //socket.emit('my event', {data:"some data"});
+        //document.getElementById("container").innerHTML="Hello World";
+        var elem = document.getElementById("button1");
+        elem.value = "working";
+    }
+</script>
+
+<button id="button1" name="button1" onclick="startFingerprinting()">Click Me!</button>
+
+<script type="text/javascript" src="heatmap.js"></script>
+<script type="text/javascript">
+
+    window.onload = function(){
+
+        var heatmap = h337.create({"element":document.getElementById("heatmapArea"), "radius":25, "visible":true});
+    };
+
+</script>
+
+</body>
+</html>
+
+

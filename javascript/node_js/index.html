@@ -1,0 +1,149 @@
+<html>
+	<head>		
+		<script type="text/javascript" src="./dist/jquery.min.js"></script>
+		<script type="text/javascript" src="./dist/jquery.jqplot.min.js"></script>
+		<script type="text/javascript" src="./dist/jquery.jqplot.min.js"></script>
+		<script type="text/javascript" src="./dist/plugins/jqplot.barRenderer.min.js"></script>
+		<script type="text/javascript" src="./dist/plugins/jqplot.pieRenderer.min.js"></script>
+		<script type="text/javascript" src="./dist/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+		<script type="text/javascript" src="./dist/plugins/jqplot.pointLabels.min.js"></script>
+		<link rel="stylesheet" type="text/css" hrf="./dist/jquery.jqplot.min.css" />
+
+		<script type="text/javascript">
+
+			// set a dummy varable
+			var stringtext = "hello";
+			var jsonObject
+			var txt
+
+			var plot1;
+			var s1 = [1.423,1.32,1.235,1.56];
+			var ticks = ['a','b','c','d'];
+			var jsonArray = [];
+
+
+			// creat the web socket
+			var socket = new WebSocket("ws://127.0.0.1:11223/");
+
+			socket.onopen = function() {
+				alert("socket open");
+				socket.send("Hey, Webserver");
+			}
+
+			socket.onmessage = function(message) {
+				// Received message from websocket, pull out the json data
+				// and sort it, making sure there are no doubles.
+
+				// make a try catch here
+				try {
+					// convert the message to a json string
+					jsonObject = $.parseJSON(message.data);
+
+					// creat a found varable, if not found push the json object to the array
+					var found = 0;
+
+					// search the current jsonArray
+					for(var i = 0; i < (jsonArray.length); i++) {
+						// if you find a match
+						if(jsonArray[i].ID == jsonObject.ID) {
+							// update the current data, do not push
+							jsonArray[i].Temp = jsonObject.Temp;
+							jsonArray[i].Batt = jsonObject.Batt;
+							found = 1;
+						}
+					}
+
+					//  if a match is not found, push the data
+					if(found == 0) {
+						jsonArray.push(jsonObject);
+					}
+
+					// sort the json array based on ID, so it ranges from lowest mote id to highest
+					jsonArray.sort(function(a,b) {
+						return (a.ID - b.ID);
+					});
+
+					// log the array, debugging
+					console.log("Current Json Array Length: " + jsonArray.length);
+					for(var i = 0; i < jsonArray.length; i++) {
+						console.log("" + jsonArray[i].ID + " " + jsonArray[i].Temp + " " + jsonArray[i].Batt);
+					}
+
+					s1 = [];
+					ticks = [];
+
+					for(var i = 0; i < jsonArray.length; i++) {
+						s1.push(jsonArray[i].Batt);
+						ticks.push(jsonArray[i].ID);
+					}
+
+					console.log("current s1 array: " + s1);
+					console.log("current tick array: " + ticks);
+
+        			doGraph();
+        			// plot1.resetAxesScale();
+        			plot1.replot();
+
+				}
+				catch(err) {
+					console.log("error" + err);
+				}
+			}
+
+			socket.onclose = function(message) {
+				alert("socket closed");
+			}
+
+			function doGraph () {
+				$.jqplot.config.enablePlugins = true ;
+
+				plot1 = $.jqplot('chart1', [s1], {
+					animate: !$.jqplot.use_excanvas,
+					animate: true,
+					// animateReplot: true,
+					
+					title: 'Mote Battery Level',
+
+					seriesDefaults: {
+		                renderer:$.jqplot.BarRenderer,
+		                pointLabels: { show: true }
+		            },
+					
+					axes: {
+		                xaxis: {
+		                	label: 'Mote ID',
+		                    renderer: $.jqplot.CategoryAxisRenderer,
+		                    ticks: ticks
+		                },
+		                yaxis: {
+		                	max: 2,
+		                	tikcs: [0.00,0.25,0.5,0.75,1.0,1.25,1.5,1.75,2],
+		                	tickOptions: {
+		                		formatString: '%#.2f'
+		                	}
+		                }
+		            },
+
+					highlighter: { show: false }
+				});
+
+				$('chart1').bind('jqplotDataClick', 
+					function(ev, seriesIndex, pointIndex, data) {
+						$('#info1').html('series: ' +seriesIndex);
+					}
+				);
+			}
+
+			// when the page is ready
+			$(document).ready(function() {
+			})
+		</script>
+	</head>
+	<body>
+		<div id = "chart1">
+		</div>
+		<title>Hello</title>
+	</body>
+</html>
+
+

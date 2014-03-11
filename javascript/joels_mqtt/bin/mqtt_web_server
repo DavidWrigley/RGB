@@ -1,0 +1,296 @@
+#!/usr/bin/env node
+
+var mqtt = require('../lib/mqtt')
+, app = require('http').createServer(handler)
+, io = require('socket.io').listen(app)
+, fs = require('fs')
+, url = require("url")
+, Db = require('mongodb').Db
+, Connection = require('mongodb').Connection
+, Server = require('mongodb').Server
+, jq = require('jquery');
+
+var static = require('node-static');
+
+var argv = process.argv;
+
+for (var i = 2; i <= 4; i++) {
+	if(!argv[i]) process.exit(-1);
+}
+
+var port = argv[2]
+, host = argv[3]
+, topic = argv[4];
+
+//constants.
+var NUM_NODES = 3;
+var NUM_SAMPLES = 10;
+
+//global variables.
+var startFingerprinting = false;
+var rssiAvgs = new Array();
+var rssiCnt = new Array();
+var fingRssiAvg = new Object();
+var fingRssiCnt = new Object();
+var fingBuilding = '17';
+var fingRoom = 'ceit';
+var fingX = 0;
+var fingY = 0;
+var fingMac = '44:4c:0c:c2:ad:28';
+var cntFingDone = 0;
+
+//socket globals
+var iosocket;
+
+//######################################################################
+//HTTP Server Code.
+
+// creating the server ( localhost:8000 ) 
+app.listen(8000);
+
+var file = new(static.Server)();
+
+// serve files to user browsers.
+function handler ( req, res ) {
+
+	req.addListener('end', function () {
+        file.serve(req, res);
+    });
+};
+
+//######################################################################
+//Helper functions.
+
+//return a string representation of the current progress in getting a fingerprint
+//of a user. (i.e "Node 1: 50 Node 2: 100 Node 3: 10")
+function getFingerprintingPercentageDone (numSamples, arrayCnt) {
+
+	var percDone = "";
+
+	for (var nodeId in arrayCnt) {
+		if(arrayCnt.hasOwnProperty(nodeId)) {
+
+			if ((arrayCnt[nodeId] / numSamples) * 100 < 100)
+				percDone += nodeId + ": " + Math.round( (arrayCnt[nodeId] / numSamples) * 100 ) + " ";
+			else 
+				percDone += nodeId + ": 100 ";
+
+			console.log("%s", percDone);
+		}
+	}
+
+	return percDone;
+}
+
+//simple function to recalculate an average with an additional value.
+function addToAverage(cumAvg, cnt, val) {
+
+	return ( (cumAvg * cnt + val) / (cnt + 1) );
+}
+
+
+//Create instance of the database backend. Requires monodb process to be running.
+var clientdb = new Db('test', new Server("127.0.0.1", 27017, {}));
+
+//Open the instance.
+clientdb.open(function(err, p_clientdb) {
+
+	//Create an instance of a MQTT client.
+	mqtt.createClient(port, host, function(err, client) {
+		if (err) {
+			console.log("Unable to connect to broker");
+			process.exit(1);
+		}
+		client.connect({keepalive: 3000});
+
+		//connect client to address and port given in command line argument.
+		client.on('connack', function(packet) {
+			if (packet.returnCode === 0) {
+				client.subscribe({topic: topic});
+			} else {
+				console.log('connack error %d', packet.returnCode);
+				process.exit(-1);
+			}
+		});
+
+		client.on('close', function() {
+			process.exit(0);
+		});
+
+		client.on('error', function(e) {
+			console.log('error %s', e);
+			process.exit(-1);
+		});
+
+		//listen to messages received from the Nodes.
+		client.on('publish', function(packet) {
+			
+			//parse json message into javascript object.
+			var ob = JSON.parse(packet.payload);
+
+			console.log('%s\t%s', packet.topic, packet.payload);
+			console.log('rssi is:%d, MAC is %s', ob.rssi, ob.macSrc);
+
+			//first packet from new node or mac address.
+			if (rssiAvgs[ob.macSrc] == null) {
+				rssiAvgs[ob.macSrc] = new Array();
+				rssiCnt[ob.macSrc] = new Array();
+			}
+			if (rssiAvgs[ob.macSrc][ob.node_id] == null) {
+				rssiAvgs[ob.macSrc][ob.node_id] = ob.rssi;
+				rssiCnt[ob.macSrc][ob.node_id] = 1;
+			}
+			else
+				rssiAvgs[ob.macSrc][ob.node_id] = addToAverage(rssiAvgs[ob.macSrc][ob.node_id], 
+					rssiCnt[ob.macSrc][ob.node_id], 
+					ob.rssi);
+
+			//getClosestDbFingerprintMatch(instColl, '17', 'ceit', rssiAvgs[ob.macSrc]);
+
+			if (startFingerprinting == true && ob.macSrc == fingMac) {
+
+				if (fingRssiAvg[ob.node_id] == null) {
+					fingRssiAvg[ob.node_id] = ob.rssi;
+					fingRssiCnt[ob.node_id] = 1;
+				}
+				else {
+					fingRssiAvg[ob.node_id] = addToAverage(fingRssiAvg[ob.node_id], fingRssiCnt[ob.node_id], ob.rssi);
+
+					console.log('cumu avg for %s is : %d (cnt is: %d)', ob.node_id, fingRssiAvg[ob.node_id], fingRssiCnt[ob.node_id]);
+				}
+
+				iosocket.emit('updateFingerprinting', getFingerprintingPercentageDone(NUM_SAMPLES, fingRssiCnt) );
+
+				if (fingRssiCnt[ob.node_id]++ == NUM_SAMPLES) {
+
+					cntFingDone++;
+				}
+
+				if (cntFingDone == NUM_NODES) {
+
+					var dbEntry = {
+						building : fingBuilding,
+						room : fingRoom,
+						mac : fingMac,
+						x: fingX, 
+						y: fingY, 
+						rssi: fingRssiAvg
+					}
+
+					p_clientdb.collection('stuff', function(err, collection) {
+
+						collection.insert(dbEntry);
+
+						//reset vars.
+						startFingerprinting = false;
+						console.log('made new db entry.');
+
+					});
+
+				}
+			}
+		});
+
+
+		//######################################################################
+		//io Socket Code.
+		// creating a new websocket to keep the content updated without any AJAX request
+
+		io.sockets.on( 'connection', function ( socket ) {
+
+			iosocket = socket;
+
+			socket.on('startFingerprinting', function (data) {
+
+				for (var val in data) {
+
+					if (val.hasOwnProperty(data) && val == null) {
+
+						console.log('cannot start fingerprinting as data not completed.');
+						return 0;
+					}
+				}
+
+				startFingerprinting = true;
+
+				fingBuilding = data.building;
+				fingRoom = data.room;
+				fingMac = data.mac;
+				fingX = data.x;
+				fingY = data.y;
+				cntFingDone = 0;
+				fingRssiAvg = new Object();
+				fingRssiCnt = new Object();
+
+				console.log('Starting a Fingerprinting session.. building:%s, room:%s, mac:%s, x:%d, y:%d', 
+					data.building, data.room, data.mac, data.x, data.y);
+			});
+
+			socket.on('refreshMyData', function (data) {
+
+				rssiAvgs[data.mac] = null;
+			});
+
+			socket.on('findMe', function ( data ) {
+
+				var closestMatch = null;
+				var closestDif = 0;
+
+				var fingerprint = rssiAvgs[data.mac];
+
+				if (rssiAvgs[data.mac] == null) {
+					socket.emit('notFound', {} );
+					return;
+				}
+
+				p_clientdb.collection('stuff', function(err, collection) {
+
+					collection.find({building: data.building, room: data.room}, {}, function(err, it) {
+						it.each(function(err, entry) {
+
+							//function will return here on a successful iteration.
+							if (entry == null) {
+
+								if (closestMatch != null)
+									socket.emit('foundYou', closestMatch );
+								else
+									socket.emit('notFound', {} );
+								return 0;
+							}
+
+							var dif = 0;
+							var nodeAvgString = "";
+
+							for (var nodeAvg in entry.rssi) {
+								if(entry.rssi.hasOwnProperty(nodeAvg)) {
+
+									if (fingerprint[nodeAvg] == null) {
+										console.log('fingerprint[%s] == null', nodeAvg);
+										return closestMatch;
+									}
+
+									dif += Math.abs(fingerprint[nodeAvg] - entry.rssi[nodeAvg]);
+									nodeAvgString += nodeAvg + "avg:" + fingerprint[nodeAvg] + " " + "rec:" + entry.rssi[nodeAvg];
+								}
+							}
+
+							console.log('%s', nodeAvgString);
+							console.log('dif is: %d, closestDif is: %d', dif, closestDif);
+
+							if (closestMatch == null || dif < closestDif) {
+								closestMatch = entry;
+								closestDif = dif;
+								console.log('new top dog.');
+							}
+							
+						});
+					});
+				});
+			});
+		});
+	});
+});
+
+
+
+

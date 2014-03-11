@@ -1,0 +1,31 @@
+// read the packets layer
+    if(foundPossition = data.indexOf("#l#",currentDataPossition)) {
+        readLayer = data[foundPossition+3];
+        Serial.println(foundPossition,DEC);
+        Serial.println(readLayer,DEC);
+        currentDataPossition += (foundPossition+4)
+    }
+
+    // read the packets pixel
+    if(foundPossition = data.indexOf("#p#",currentDataPossition)) {
+        readPixel = data[foundPossition+3];
+        Serial.println(foundPossition,DEC);
+        Serial.println(readPixel,DEC);
+        currentDataPossition += (foundPossition+4)
+    }
+
+    // read the packets red value
+    if(foundPossition = data.indexOf("#r#",currentDataPossition)) {
+        readRed = data[foundPossition+3];
+        Serial.println(foundPossition,DEC);
+        Serial.println(readRed,DEC);
+        currentDataPossition += (foundPossition+4)
+    }
+
+    // read the packets green value
+    if(foundPossition = data.indexOf("#r#",currentDataPossition)) {
+        readRed = data[foundPossition+3];
+        Serial.println(foundPossition,DEC);
+        Serial.println(readRed,DEC);
+        currentDataPossition += (foundPossition+4)
+    }

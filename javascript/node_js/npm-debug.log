@@ -1,0 +1,43 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/node', '/usr/bin/npm', 'install', 'ws' ]
+2 info using npm@1.3.5
+3 info using node@v0.10.15
+4 verbose node symlink /usr/bin/node
+5 verbose cache add [ 'ws', null ]
+6 verbose cache add name=undefined spec="ws" args=["ws",null]
+7 verbose parsed url { protocol: null,
+7 verbose parsed url   slashes: null,
+7 verbose parsed url   auth: null,
+7 verbose parsed url   host: null,
+7 verbose parsed url   port: null,
+7 verbose parsed url   hostname: null,
+7 verbose parsed url   hash: null,
+7 verbose parsed url   search: null,
+7 verbose parsed url   query: null,
+7 verbose parsed url   pathname: 'ws',
+7 verbose parsed url   path: 'ws',
+7 verbose parsed url   href: 'ws' }
+8 silly lockFile 1457b75d-ws ws
+9 verbose lock ws /home/david/.npm/1457b75d-ws.lock
+10 silly lockFile 1457b75d-ws ws
+11 verbose addNamed [ 'ws', '' ]
+12 verbose addNamed [ null, '*' ]
+13 silly lockFile e88fe629-ws ws@
+14 verbose lock ws@ /home/david/.npm/e88fe629-ws.lock
+15 silly lockFile e88fe629-ws ws@
+16 error Error: EACCES, open '/home/david/.npm/e88fe629-ws.lock'
+16 error  { [Error: EACCES, open '/home/david/.npm/e88fe629-ws.lock']
+16 error   errno: 3,
+16 error   code: 'EACCES',
+16 error   path: '/home/david/.npm/e88fe629-ws.lock' }
+17 error Please try running this command again as root/Administrator.
+18 error System Linux 3.2.0-49-generic-pae
+19 error command "/usr/bin/node" "/usr/bin/npm" "install" "ws"
+20 error cwd /home/david/Dropbox/Fourth Year/Semester 2/ENGG4802/Programs/javascript/node_js
+21 error node -v v0.10.15
+22 error npm -v 1.3.5
+23 error path /home/david/.npm/e88fe629-ws.lock
+24 error code EACCES
+25 error errno 3
+26 error stack Error: EACCES, open '/home/david/.npm/e88fe629-ws.lock'
+27 verbose exit [ 3, true ]

@@ -1,0 +1,94 @@
+extern "C"
+{
+	void __ISR(_TIMER_2_VECTOR,ipl2) playSam(void)
+	{
+		// Clear the interrupt flag
+    	//Serial.println("layer");
+
+
+    	// resest the counter
+    	if(counter == 78) {
+			counter = 70;
+		}
+
+		// force the coloue high, as it may still be low from last layer
+    	digitalWrite(78, 1);
+    	digitalWrite(79, 1);
+    	digitalWrite(80, 1);
+
+    	// turn off the last layer
+    	if(counter == 70) {
+    		digitalWrite(77, 0);
+    	} else {
+    		digitalWrite((counter - 1), 0);
+    	}
+
+    	colourcounter = 0;
+    	// eneable the next layer
+    	digitalWrite(counter, 1);
+
+    	// increment
+    	counter++;   
+        INTClearFlag(INT_T2); 
+	}
+
+	void __ISR(_TIMER_4_VECTOR,ipl2) playSam2(void)
+	{
+		// Clear the interrupt flag
+        //Serial.println("BAM!");
+
+    	// look into the colour array and determin for how long to hold the pins high
+    	if(colourcounter < ledArray[counter-71][0]) {
+    		digitalWrite(78, 0);
+    	} else {
+    		digitalWrite(78, 1);
+    	}
+
+    	if(colourcounter < ledArray[counter-71][1]) {
+    		digitalWrite(79, 0);
+    	} else {
+    		digitalWrite(79, 1);
+    	}
+
+    	if(colourcounter < ledArray[counter-71][2]) {
+    		digitalWrite(80, 0);
+    	} else {
+    		digitalWrite(80, 1);
+    	}
+
+    	// increment the colourcounter
+    	if(colourcounter > duty) {
+    		// do nothing
+    	} else {
+    		colourcounter++;
+    	}
+        INTClearFlag(INT_T4);  
+	}
+
+	void __ISR(_TIMER_3_VECTOR,ipl2) playSa(void)
+	{
+		// Clear the interrupt flag
+        Serial.println("switch!");
+    	for (int i = 0; i < 8; ++i)
+    	{
+    		if(ledArray[i][0] >= 9) {
+    			ledArray[i][0] = 0;
+    		} else {
+    			ledArray[i][0]++;
+    		}
+
+    		if(ledArray[i][1] >= 9) {
+    			ledArray[i][1] = 0;
+    		} else {
+    			ledArray[i][1]++;
+    		}
+
+    		if(ledArray[i][2] >= 9) {
+    			ledArray[i][2] = 0;
+    		} else {
+    			ledArray[i][2]++;
+    		}
+    	}
+        INTClearFlag(INT_T3);
+	}
+} 
