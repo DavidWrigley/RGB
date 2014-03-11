@@ -1,60 +1,56 @@
+/**
+ * LIBS
+ */
 #include <time.h>
 #include <plib.h>
 #include <Wiring.h>
 #include <chipKITEthernet.h>
 
+/**
+ * Local LIBS
+ */
 #include "pin_out.h"
+
+/**
+ * Global Varables
+ */
 
 // Ethernet 
 // byte ip[] = { 192,168,1,190 };
 byte mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 byte gateway[] = { 192,168,1, 1 };
 byte subnet[] = { 255, 255, 255, 0 };
-
 // local port to listen on
 unsigned short localPort = 8888;
-
 // start TCP server
 Server server = Server(8888);
-
+// ProcessString Varables
 int bytes_read = 0;
 int currentDataPossition = 0;
-
-// Globals
-
-int colour = 78;
-int prevcolour = 78;
-
-int brightness = 27;
+// BAM varables
 int colourcounter = 0;
 int duty = 8;
-
 // 64 bit mask
 uint64_t Mask = 0xFFFFFFFFFFFFFFFF;
 // 64 bit shift
 uint64_t shift = 1;
-
+// port F Register
 uint32_t on = 0;
-
+// SPI values when performing BAM
 uint64_t spiRed = 0;
 uint64_t spiGreen = 0;
 uint64_t spiBlue = 0;
-
+// SPI data being processed by SPISend()
 uint64_t dataRed = 0;
 uint64_t dataGreen = 0;
 uint64_t dataBlue = 0;
-
-char incomingByte = 0;
+// Perform colour changed, Testing
 char direction = 1;
-
 char redchange = 0;
 char bluechange = 0;
 char greenchange = 0;
-
 // 8 layers, 64 pixels, 3 colours
 char ledArray[8][64][3];
-String myString;
-
 // layer arrays
 char layerPossitionCounter = 0;
 char layerArray[8] = { layerpin_1, layerpin_2, layerpin_3, layerpin_4, 
@@ -152,6 +148,10 @@ void loop() {
     }
 }
 
+/**
+ * Processes the String received from the Ethernet controller
+ * @param data Pointer to character array, i.e. the string of data
+ */
 void ProcessString(char* data) {
     // define the packet [] is 1 byte 0 -> 256
     // [Layer][Pixel][Red][Green][Blue]#
@@ -187,7 +187,12 @@ void ProcessString(char* data) {
     Serial.print("\n");
     */
 }
-
+/**
+ * Custom SPI function to send 3 lines of data simultaniously
+ * @param dataRed   The Value of the RED registers
+ * @param dataGreen The Value of the GREEN registers
+ * @param dataBlue  The Value of the BLUE registers
+ */
 void SpiSend(uint64_t dataRed, uint64_t dataGreen, uint64_t dataBlue) {
 
     // start communication
@@ -236,6 +241,12 @@ void SpiSend(uint64_t dataRed, uint64_t dataGreen, uint64_t dataBlue) {
     LATECLR = (pinSS|pinMOSIR|pinMOSIG|pinMOSIB|pinSCK);
 }
 
+/**
+ * Bit Angle Manipulation callback, this deals with the intensity of the colour
+ * being produced by the LED's, 8 is full, 0 is off
+ * @param  currentTime Unknown
+ * @return             Current time + when you want it to go off next
+ */
 uint32_t bamCallback(uint32_t currentTime) {
 
     // look into the colour array and determin for how long to hold the pins high
@@ -294,6 +305,13 @@ uint32_t bamCallback(uint32_t currentTime) {
     // return (currentTime + CORE_TICK_RATE*200);
 }
 
+/**
+ * Layer callback, when the layers need to switch, this had to be
+ * in time with the BAM or the colours will not look the same for
+ * each layer, this needs further testing
+ * @param  currentTime Unknown
+ * @return             dito from above
+ */
 uint32_t layerCallback(uint32_t currentTime) {
 
     // TODO: replace this with direct access to the pins, not using digital write
