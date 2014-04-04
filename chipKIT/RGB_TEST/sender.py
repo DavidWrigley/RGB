@@ -4,10 +4,18 @@ import threading
 import signal
 import sys
 
+# Socket Varables
 TCP_IP = "192.168.1.107"
 TCP_PORT = 8888
 BUFFER_SIZE = 1024
 
+# Global Varables
+UserSelect = 0;
+layer = 0;
+pixel = 0;
+red = 0;
+green = 0;
+blue = 0;
 
 def connect(IP, Port):
     """
@@ -66,16 +74,32 @@ if __name__ == '__main__':
     while (True):
         toggle = 8
         message = ""
-        layer = raw_input("layer: ")
-        pixel = raw_input("pixel: ")
-        red = raw_input("red: ")
-        green = raw_input("green: ")
-        blue = raw_input("blue: ")
 
-        # convert the raw numbers into Byte value, i.e. 0 represents the byte value of 0
-        # 1, insted of 51 (or whatever) has value 1
-        message += ( str(unichr(int(layer))) + str(unichr(int(pixel))) + str(unichr(int(red))) + str(unichr(int(green))) + str(unichr(int(blue))) )
-        
+        if(UserSelect):
+            layer = raw_input("layer: ")
+            pixel = raw_input("pixel: ")
+            red = raw_input("red: ")
+            green = raw_input("green: ")
+            blue = raw_input("blue: ")
+
+            # convert the raw numbers into Byte value, i.e. 0 represents the byte value of 0
+            # 1, insted of 51 (or whatever) has value 1
+            message += ( str(unichr(int(layer))) + str(unichr(int(pixel))) + str(unichr(int(red))) + str(unichr(int(green))) + str(unichr(int(blue))) )
+        else:
+            time.sleep(.5);
+            layer = 0;
+            pixel = 63;
+            red = 0;
+            green = 0;
+            if(blue == 8):
+                blue = 0;
+            else:
+                blue = 8;
+
+            for i in range(0,8):
+                for a in range(0,64):
+                    message += ( str(unichr(int(i))) + str(unichr(int(a))) + str(unichr(int(red))) + str(unichr(int(green))) + str(unichr(int(blue))) )
+
         # try to send the message, if failur, then re-connect
         try:
             sock.send(message)

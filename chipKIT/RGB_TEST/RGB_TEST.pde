@@ -11,10 +11,18 @@
  */
 #include "pin_out.h"
 
+ /**
+  * Defines
+  */
+#define layermax 8;
+#define pixelmax 64;
+#define redmax 8;
+#define greenmax 8;
+#define bluemax 8;
+
 /**
  * Global Varables
  */
-
 // Ethernet 
 // byte ip[] = { 192,168,1,190 };
 byte mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -55,6 +63,13 @@ char ledArray[8][64][3];
 char layerPossitionCounter = 0;
 char layerArray[8] = { layerpin_1, layerpin_2, layerpin_3, layerpin_4, 
                        layerpun_5, layerpin_6, layerpin_7, layerpin_8};
+//pixeltest
+char pixelteston = 1;
+char currenttestlayer = 1;
+char currenttestpixel = 0;
+char testredpixel = 0;
+char testgreenpixel = 0;
+char testbluepixel = 0;
 
 void setup() {
 
@@ -72,9 +87,6 @@ void setup() {
 
     // set pins to output
     TRISECLR = pinSS|pinSCK|pinMOSIR|pinMOSIG|pinMOSIB;
-
-    // clear the spi device
-    // SpiSend(0x0000000000000000,0x0000000000000000,0x0000000000000000);
 
     Serial.println("Layers");
 
@@ -98,16 +110,15 @@ void setup() {
     INTSetVectorPriority(INT_TIMER_3_VECTOR, INT_PRIORITY_LEVEL_2);
     INTSetVectorSubPriority(INT_TIMER_3_VECTOR, INT_SUB_PRIORITY_LEVEL_0);
 
-    //delay(1);
-
     // Enable multi-vector interrupts
     INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
     INTEnableInterrupts();
 
     attachCoreTimerService(bamCallback);
-    //delay(1);
     attachCoreTimerService(layerCallback);
-    //delay(1);
+
+    // pixel testing counter
+    attachCoreTimerService(pixeltest);
     
     Serial.println("Zeroing!");
 
@@ -131,7 +142,7 @@ void loop() {
 
     if(client == true) {
 
-        bytes_read = client.read((uint8_t*)fromclient,1024);
+        bytes_read = client.read((uint8_t*)fromclient,1000);
         currentDataPossition = 0; 
 
         fromclient[bytes_read] = '\0';
@@ -155,7 +166,6 @@ void loop() {
 void ProcessString(char* data) {
     // define the packet [] is 1 byte 0 -> 256
     // [Layer][Pixel][Red][Green][Blue]#
-
     // read the data from the ethernet stream
     uint8_t readLayer = data[currentDataPossition];
     currentDataPossition++;
@@ -168,10 +178,21 @@ void ProcessString(char* data) {
     uint8_t readBlue = data[currentDataPossition];
     currentDataPossition++;
 
-    // assign the colour read.
-    ledArray[readLayer][readPixel][0] = readRed;
-    ledArray[readLayer][readPixel][1] = readGreen;
-    ledArray[readLayer][readPixel][2] = readBlue;
+    // need to check if the values are safe
+    if((readLayer < layermax)
+        &&(readPixel < pixelmax)
+        &&(readRed < redmax)
+        &&(readGreen < greenmax)
+        &&(readBlue < bluemax)) {
+        // is safe
+        // assign the colour read.
+        ledArray[readLayer][readPixel][0] = readRed;
+        ledArray[readLayer][readPixel][1] = readGreen;
+        ledArray[readLayer][readPixel][2] = readBlue;
+    } else {
+        // not safe
+        // ignore
+    }
 
     // print data
     /*
@@ -345,6 +366,36 @@ uint32_t layerCallback(uint32_t currentTime) {
     layerPossitionCounter++;       
     return (currentTime + CORE_TICK_RATE*1.6);
     // return (currentTime + CORE_TICK_RATE*1600);
+}
+
+uint32_t pixeltest(uint32_t currentTime) {
+    if(pixelteston) {
+        // if red test is on, set the red pixel
+        if(testredpixel) {
+            ledArray[currenttestlayer][currenttestpixel][0] = 8;
+        }
+        // if green test is on, set the green pixel
+        if(testgreenpixel) {
+            ledArray[currenttestlayer][currenttestpixel][1] = 8;
+        }
+        // if blue test is on, set the blue pixel
+        if(testbluepixel) {
+            ledArray[currenttestlayer][currenttestpixel][2] = 8;
+        }
+        // if the currentpixel is at its max, 63, reset it to 0 and switch layer
+        if(currenttestpixel == 63) {
+            // increment the layer
+            currenttestlayer += 1;
+            // set the current pixel back to zero
+            currenttestpixel = 0;
+        }
+        // check the layer is not past its maximum of 8 if it is, set it back to zero
+        if(currenttestlayer == 8) {
+            currenttestlayer = 0;
+        }
+    }
+    // return to switch on pixels very 1600 seconds.
+    return (currentTime + CORE_TICK_RATE*1600);
 }
 
 extern "C"
