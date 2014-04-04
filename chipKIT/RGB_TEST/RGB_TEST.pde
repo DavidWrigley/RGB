@@ -14,11 +14,11 @@
  /**
   * Defines
   */
-#define layermax 8;
-#define pixelmax 64;
-#define redmax 8;
-#define greenmax 8;
-#define bluemax 8;
+#define layermax 8
+#define pixelmax 64
+#define redmax 8
+#define greenmax 8
+#define bluemax 8
 
 /**
  * Global Varables
