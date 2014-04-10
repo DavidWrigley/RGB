@@ -3,19 +3,21 @@ import time
 import threading
 import signal
 import sys
+from random import randint
 
 # Socket Varables
-TCP_IP = "192.168.1.107"
+TCP_IP = "130.102.86.142"
+#TCP_IP = "192.168.1.107"
 TCP_PORT = 8888
 BUFFER_SIZE = 1024
 
 # Global Varables
-UserSelect = 0;
-layer = 0;
-pixel = 0;
-red = 0;
-green = 0;
-blue = 0;
+UserSelect = 0
+layer = 0
+pixel = 0
+red = '0'
+green = '0'
+blue = '0'
 
 def connect(IP, Port):
     """
@@ -86,20 +88,37 @@ if __name__ == '__main__':
             # 1, insted of 51 (or whatever) has value 1
             message += ( str(unichr(int(layer))) + str(unichr(int(pixel))) + str(unichr(int(red))) + str(unichr(int(green))) + str(unichr(int(blue))) )
         else:
-            time.sleep(.5);
-            layer = 0;
-            pixel = 63;
-            red = 0;
-            green = 0;
-            if(blue == 8):
-                blue = 0;
-            else:
-                blue = 8;
+            print "Send! " + str(layer) + " " + str(pixel) + " Red"
+            time.sleep(.01)
+            for a in range(0,512):
+                message += ( str(unichr(int(str(layer)))) + str(unichr(int(str(pixel)))) + str(unichr(int('8'))) +str(unichr(int('8'))) + str(unichr(int('8'))) )
+                pixel += 1
+                
+                red = str(randint(0,8))
+                green = str(randint(0,8))
+                blue = str(randint(0,8))
+                
+                if(pixel == 64):
+                    layer += 1
+                    pixel = 0
+                    if(layer == 8):
+                        layer = 0
+                        """
+                        if(red == '0'):
+                            red = '8'
+                        else:
+                            red = '0'
+                        if(green == '0'):
+                            green = '8'
+                        else:
+                            green = '0'
+                        if(blue == '0'):
+                            blue = '8'
+                        else:
+                            blue = '0'
+                        """
 
-            for i in range(0,8):
-                for a in range(0,64):
-                    message += ( str(unichr(int(i))) + str(unichr(int(a))) + str(unichr(int(red))) + str(unichr(int(green))) + str(unichr(int(blue))) )
-
+            #time.sleep(.2)
         # try to send the message, if failur, then re-connect
         try:
             sock.send(message)

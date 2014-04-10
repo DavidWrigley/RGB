@@ -25,7 +25,7 @@
  */
 // Ethernet 
 // byte ip[] = { 192,168,1,190 };
-byte mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+byte mac[] = { 0x01, 0x23, 0x45, 0x67, 0x8A, 0xBC };
 byte gateway[] = { 192,168,1, 1 };
 byte subnet[] = { 255, 255, 255, 0 };
 // local port to listen on
@@ -65,11 +65,19 @@ char layerArray[8] = { layerpin_1, layerpin_2, layerpin_3, layerpin_4,
                        layerpun_5, layerpin_6, layerpin_7, layerpin_8};
 //pixeltest
 char pixelteston = 1;
-char currenttestlayer = 1;
+char currenttestlayer = 0;
 char currenttestpixel = 0;
-char testredpixel = 0;
+char testredpixel = 1;
 char testgreenpixel = 0;
 char testbluepixel = 0;
+// buffer
+char fromclient[2570];
+// read varables
+uint8_t readLayer = 0;
+uint8_t readPixel = 0;
+uint8_t readRed = 0;
+uint8_t readGreen = 0;
+uint8_t readBlue = 0;
 
 void setup() {
 
@@ -100,6 +108,15 @@ void setup() {
 	pinMode(layerArray[6], OUTPUT);
 	pinMode(layerArray[7], OUTPUT);
 
+    digitalWrite(layerArray[0], 1);
+    digitalWrite(layerArray[1], 1);
+    digitalWrite(layerArray[2], 1);
+    digitalWrite(layerArray[3], 1);
+    digitalWrite(layerArray[4], 1);
+    digitalWrite(layerArray[5], 1);
+    digitalWrite(layerArray[6], 1);
+    digitalWrite(layerArray[7], 1);
+
     Serial.println("Timers");
 
     // ledarray modifier
@@ -114,11 +131,9 @@ void setup() {
     INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
     INTEnableInterrupts();
 
+    // can only have 2 attatched timers
     attachCoreTimerService(bamCallback);
     attachCoreTimerService(layerCallback);
-
-    // pixel testing counter
-    attachCoreTimerService(pixeltest);
     
     Serial.println("Zeroing!");
 
@@ -134,80 +149,63 @@ void setup() {
 }
 
 void loop() {
-  
-    char fromclient[1024];
-    
+
     // if there's data available, read a packet
     Client client = server.available();
 
     if(client == true) {
 
-        bytes_read = client.read((uint8_t*)fromclient,1000);
+        bytes_read = client.read((uint8_t*)fromclient,2560);
         currentDataPossition = 0; 
 
-        fromclient[bytes_read] = '\0';
+        Serial.print("Bytes_Read: ");
+        Serial.print(bytes_read,DEC);
+        Serial.println(""); 
 
-        /*
-        // print the data
-        Serial.println(bytes_read);
-        Serial.println(fromclient);
-        */
-       
-        while(currentDataPossition < (bytes_read-2)) {
-            ProcessString(fromclient);
+        for(int i = 0; i < bytes_read; i += 5) {
+            // define the packet [] is 1 byte 0 -> 256
+            // [Layer][Pixel][Red][Green][Blue]#
+            // read the data from the ethernet stream
+            readLayer = fromclient[i];
+            readPixel = fromclient[i+1];
+            readRed = fromclient[i+2];
+            readGreen = fromclient[i+3];
+            readBlue = fromclient[i+4];
+
+            // assign the colour read and also check for safty
+            if( ((bytes_read % 5) == 0)
+                &&((readLayer < 8)&&(readLayer >= 0))
+                &&((readPixel < 64)&&(readPixel >= 0))
+                &&((readRed <= 8)&&(readRed >= 0))
+                &&((readGreen <= 8)&&(readGreen >= 0))
+                &&((readBlue <= 8)&&(readBlue >= 0)) ) {
+                ledArray[readLayer][readPixel][0] = readRed;
+                ledArray[readLayer][readPixel][1] = readGreen;
+                ledArray[readLayer][readPixel][2] = readBlue;
+            } else {
+                // ignore it
+                // Serial.println("Bad");
+            }
+            
+/*
+            Serial.print("i: ");
+            Serial.print(i,DEC);
+            Serial.print(" RL: ");
+            Serial.print(readLayer,DEC);
+            Serial.print(" RP: ");
+            Serial.print(readPixel,DEC);
+            Serial.print(" R: ");
+            Serial.print(readRed,DEC);
+            Serial.print(" G: ");
+            Serial.print(readGreen,DEC);
+            Serial.print(" B: ");
+            Serial.print(readBlue,DEC);
+            Serial.println("");
+*/
         }
     }
 }
 
-/**
- * Processes the String received from the Ethernet controller
- * @param data Pointer to character array, i.e. the string of data
- */
-void ProcessString(char* data) {
-    // define the packet [] is 1 byte 0 -> 256
-    // [Layer][Pixel][Red][Green][Blue]#
-    // read the data from the ethernet stream
-    uint8_t readLayer = data[currentDataPossition];
-    currentDataPossition++;
-    uint8_t readPixel = data[currentDataPossition];
-    currentDataPossition++;
-    uint8_t readRed = data[currentDataPossition];
-    currentDataPossition++;
-    uint8_t readGreen = data[currentDataPossition];
-    currentDataPossition++;
-    uint8_t readBlue = data[currentDataPossition];
-    currentDataPossition++;
-
-    // need to check if the values are safe
-    if((readLayer < layermax)
-        &&(readPixel < pixelmax)
-        &&(readRed < redmax)
-        &&(readGreen < greenmax)
-        &&(readBlue < bluemax)) {
-        // is safe
-        // assign the colour read.
-        ledArray[readLayer][readPixel][0] = readRed;
-        ledArray[readLayer][readPixel][1] = readGreen;
-        ledArray[readLayer][readPixel][2] = readBlue;
-    } else {
-        // not safe
-        // ignore
-    }
-
-    // print data
-    /*
-    Serial.print(readLayer);
-    Serial.print(" ");
-    Serial.print(readPixel);
-    Serial.print(" ");
-    Serial.print(readRed);
-    Serial.print(" ");
-    Serial.print(readGreen);
-    Serial.print(" ");
-    Serial.print(readBlue);
-    Serial.print("\n");
-    */
-}
 /**
  * Custom SPI function to send 3 lines of data simultaniously
  * @param dataRed   The Value of the RED registers
@@ -352,6 +350,17 @@ uint32_t layerCallback(uint32_t currentTime) {
 
     // turn off the last layer
     if(layerPossitionCounter == 0) {
+        digitalWrite(layerArray[7], 1);
+    } else {
+        digitalWrite(layerArray[(layerPossitionCounter - 1)], 1);
+    }
+
+    // eneable the next layer
+    digitalWrite(layerArray[layerPossitionCounter], 0);
+
+    /* HOME TEST
+    // turn off the last layer HOME TEST
+    if(layerPossitionCounter == 0) {
         digitalWrite(layerArray[7], 0);
     } else {
         digitalWrite(layerArray[(layerPossitionCounter - 1)], 0);
@@ -359,6 +368,8 @@ uint32_t layerCallback(uint32_t currentTime) {
 
     // eneable the next layer
     digitalWrite(layerArray[layerPossitionCounter], 1);
+    */
+
     // reset the BAM counter
     colourcounter = 0;
 
@@ -368,72 +379,35 @@ uint32_t layerCallback(uint32_t currentTime) {
     // return (currentTime + CORE_TICK_RATE*1600);
 }
 
-uint32_t pixeltest(uint32_t currentTime) {
-    if(pixelteston) {
-        // if red test is on, set the red pixel
-        if(testredpixel) {
-            ledArray[currenttestlayer][currenttestpixel][0] = 8;
-        }
-        // if green test is on, set the green pixel
-        if(testgreenpixel) {
-            ledArray[currenttestlayer][currenttestpixel][1] = 8;
-        }
-        // if blue test is on, set the blue pixel
-        if(testbluepixel) {
-            ledArray[currenttestlayer][currenttestpixel][2] = 8;
-        }
-        // if the currentpixel is at its max, 63, reset it to 0 and switch layer
-        if(currenttestpixel == 63) {
-            // increment the layer
-            currenttestlayer += 1;
-            // set the current pixel back to zero
-            currenttestpixel = 0;
-        }
-        // check the layer is not past its maximum of 8 if it is, set it back to zero
-        if(currenttestlayer == 8) {
-            currenttestlayer = 0;
-        }
-    }
-    // return to switch on pixels very 1600 seconds.
-    return (currentTime + CORE_TICK_RATE*1600);
-}
-
 extern "C"
 {
     void __ISR(_TIMER_3_VECTOR,ipl2) playSa(void)
-    {
-        // Clear the interrupt flag
-        // Red
-    
-        for (int i = 0; i < 8; ++i)
-        {
-            for(int j = 0; j < 64; j++) {
-                
-                if(redchange) {
-                    if(ledArray[i][j][0] >= 9) {
-                        ledArray[i][j][0] = 0;
-                    } else {
-                        ledArray[i][j][0] += direction;
-                    }
-                }
-
-                if(greenchange) {
-                    if(ledArray[i][j][1] >= 9) {
-                        ledArray[i][j][1] = 0;
-                    } else {
-                        ledArray[i][j][1] += direction;
-                    }
-                }
-                
-                if(bluechange) {
-                    if(ledArray[i][j][2] >= 9) {
-                        ledArray[i][j][2] = 0;
-                    } else {
-                        ledArray[i][j][2] += direction;
-                    }
-                }
+    {    
+        if(pixelteston == 1) {
+            // if red test is on, set the red pixel
+            if(testredpixel == 1) {
+                ledArray[currenttestlayer][currenttestpixel][0] = 8;
             }
-        }  
+            // if green test is on, set the green pixel
+            if(testgreenpixel == 1) {
+                ledArray[currenttestlayer][currenttestpixel][1] = 8;
+            }
+            // if blue test is on, set the blue pixel
+            if(testbluepixel == 1) {
+                ledArray[currenttestlayer][currenttestpixel][2] = 8;
+            }
+            // if the currentpixel is at its max, 63, reset it to 0 and switch layer
+            if(currenttestpixel == 63) {
+                // increment the layer
+                currenttestlayer += 1;
+                // set the current pixel back to zero
+                currenttestpixel = 0;
+            }
+            // check the layer is not past its maximum of 8 if it is, set it back to zero
+            if(currenttestlayer == 8) {
+                currenttestlayer = 0;
+            }
+        }
         INTClearFlag(INT_T3);
     }
 } 
