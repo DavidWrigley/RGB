@@ -89,21 +89,20 @@ if __name__ == '__main__':
             message += ( str(unichr(int(layer))) + str(unichr(int(pixel))) + str(unichr(int(red))) + str(unichr(int(green))) + str(unichr(int(blue))) )
         else:
             print "Send! " + str(layer) + " " + str(pixel) + " Red"
-            time.sleep(.01)
-            for a in range(0,512):
-                message += ( str(unichr(int(str(layer)))) + str(unichr(int(str(pixel)))) + str(unichr(int('8'))) +str(unichr(int('8'))) + str(unichr(int('8'))) )
+            time.sleep(.000001)
+            for a in range(0,1):
+                message += ( str(unichr(int(str(randint(0,8))))) + str(unichr(int(str(randint(0,63))))) + str(unichr(int(red))) +str(unichr(int(green))) + str(unichr(int(blue))) )
                 pixel += 1
-                
                 red = str(randint(0,8))
                 green = str(randint(0,8))
                 blue = str(randint(0,8))
-                
+                message += ( str(unichr(int(str(randint(0,8))))) + str(unichr(int(str(randint(0,63))))) + str(unichr(int('0'))) +str(unichr(int('0'))) + str(unichr(int('0'))) )
+
                 if(pixel == 64):
                     layer += 1
                     pixel = 0
                     if(layer == 8):
                         layer = 0
-                        """
                         if(red == '0'):
                             red = '8'
                         else:
@@ -116,7 +115,6 @@ if __name__ == '__main__':
                             blue = '8'
                         else:
                             blue = '0'
-                        """
 
             #time.sleep(.2)
         # try to send the message, if failur, then re-connect

@@ -94,7 +94,10 @@ void setup() {
     Serial.println("SPI");
 
     // set pins to output
-    TRISECLR = pinSS|pinSCK|pinMOSIR|pinMOSIG|pinMOSIB;
+    TRISECLR = pinSS|pinSCK|pinMOSIR|pinMOSIG|pinMOSIB|pinOE;
+
+    // clear OE, making the SPI chip output.
+    LATECLR = pinOE;
 
     Serial.println("Layers");
 
