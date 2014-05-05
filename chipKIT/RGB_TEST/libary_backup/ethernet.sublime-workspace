@@ -1,0 +1,1054 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"print",
+				"println"
+			],
+			[
+				"read",
+				"readBlue"
+			],
+			[
+				"byte",
+				"bytes_read"
+			],
+			[
+				"from",
+				"fromclient"
+			],
+			[
+				"lay",
+				"layerArray"
+			],
+			[
+				"digit",
+				"digitalWrite"
+			],
+			[
+				"pixe",
+				"pixeltest"
+			],
+			[
+				"cr",
+				"currenttestpixel"
+			],
+			[
+				"test",
+				"testbluepixel"
+			],
+			[
+				"cur",
+				"currenttestpixel"
+			],
+			[
+				"curr",
+				"currenttestlayer"
+			],
+			[
+				"led",
+				"ledArray"
+			],
+			[
+				"pix",
+				"pixel"
+			],
+			[
+				"blue",
+				"bluemax"
+			],
+			[
+				"gre",
+				"greenmax"
+			],
+			[
+				"layer",
+				"layermax"
+			],
+			[
+				"def",
+				"define"
+			],
+			[
+				"DEFIN",
+				"define"
+			],
+			[
+				"LA",
+				"LATESET"
+			],
+			[
+				"prin",
+				"print"
+			],
+			[
+				"data",
+				"dataBlue"
+			],
+			[
+				"dat",
+				"dataGreen"
+			],
+			[
+				"da",
+				"dataRed"
+			],
+			[
+				"pri",
+				"println"
+			],
+			[
+				"time",
+				"timeout"
+			],
+			[
+				"TCP",
+				"TCP_PORT	Default"
+			],
+			[
+				"tim",
+				"timeout	Default"
+			],
+			[
+				"sock",
+				"socket	Default"
+			],
+			[
+				"mqt",
+				"mqttc	Default"
+			],
+			[
+				"si",
+				"singOnDay	Default"
+			],
+			[
+				"lo",
+				"localtime	Default"
+			],
+			[
+				"K",
+				"Keys"
+			],
+			[
+				"En",
+				"enough"
+			],
+			[
+				"co",
+				"count"
+			],
+			[
+				"Key",
+				"Keys"
+			],
+			[
+				"Ky",
+				"KeysDict"
+			],
+			[
+				"date",
+				"DateObj"
+			],
+			[
+				"Sta",
+				"StartDay"
+			],
+			[
+				"coun",
+				"counter"
+			],
+			[
+				"cou",
+				"counter"
+			],
+			[
+				"count",
+				"counter"
+			],
+			[
+				"Ke",
+				"Keys"
+			],
+			[
+				"pre",
+				"previousValue"
+			],
+			[
+				"COnne",
+				"connected"
+			],
+			[
+				"logg",
+				"logging	Default"
+			],
+			[
+				"Keys",
+				"KeysDict"
+			],
+			[
+				"sorte",
+				"sortedKeys"
+			],
+			[
+				"sig",
+				"sign"
+			],
+			[
+				"Da",
+				"Date"
+			],
+			[
+				"get",
+				"getDate"
+			],
+			[
+				"Dat",
+				"DateObj"
+			],
+			[
+				"con",
+				"contents"
+			],
+			[
+				"sore",
+				"sortedKeys"
+			],
+			[
+				"repl",
+				"replaceString"
+			],
+			[
+				"st",
+				"start	Default"
+			],
+			[
+				"user",
+				"userName"
+			],
+			[
+				"table",
+				"table_round"
+			],
+			[
+				"ec",
+				"except	Default"
+			],
+			[
+				"sort",
+				"sortedUserHashValues	Default"
+			],
+			[
+				"use",
+				"userLogHash	Default"
+			],
+			[
+				"chec",
+				"checkUserLogout	Default"
+			],
+			[
+				"us",
+				"users	Default"
+			],
+			[
+				"hou",
+				"hoursRemaining	Default"
+			],
+			[
+				"min",
+				"minutes	Default"
+			],
+			[
+				"hun",
+				"huntForUser"
+			],
+			[
+				"parse",
+				"parseInt"
+			],
+			[
+				"SOr",
+				"SortedKeys"
+			],
+			[
+				"Time",
+				"TimeString"
+			],
+			[
+				"buil",
+				"buildString"
+			],
+			[
+				"Re",
+				"Result"
+			],
+			[
+				"Sor",
+				"SortedKeys"
+			],
+			[
+				"Cur",
+				"Current"
+			],
+			[
+				"ret",
+				"returnTime"
+			],
+			[
+				"retu",
+				"returnTime"
+			],
+			[
+				"UT",
+				"UTCStartDay"
+			],
+			[
+				"Curr",
+				"Current"
+			],
+			[
+				"ma",
+				"maximum"
+			],
+			[
+				"sor",
+				"sortedKeys"
+			],
+			[
+				"Get",
+				"getAllFromHash"
+			],
+			[
+				"Cu",
+				"CurrentDay"
+			],
+			[
+				"hash",
+				"hashkey	Default"
+			],
+			[
+				"cure",
+				"current_signin	Default"
+			],
+			[
+				"curren",
+				"current_number	Default"
+			],
+			[
+				"e",
+				"else	Default"
+			],
+			[
+				"sign",
+				"signOut"
+			],
+			[
+				"signIn",
+				"signIn"
+			],
+			[
+				"scre",
+				"screenTopic	Default"
+			],
+			[
+				"my",
+				"my_str	Default"
+			],
+			[
+				"has",
+				"hashkey	Default"
+			],
+			[
+				"ifr",
+				"iframe_height"
+			],
+			[
+				"new",
+				"newwidth"
+			],
+			[
+				"serv",
+				"servMessage"
+			],
+			[
+				"lr",
+				"lrem"
+			],
+			[
+				"firstName",
+				"firstName"
+			],
+			[
+				"call",
+				"callback"
+			],
+			[
+				"Last",
+				"Last"
+			],
+			[
+				"ri",
+				"rfidTag"
+			],
+			[
+				"ful",
+				"fullBody"
+			],
+			[
+				"fixe",
+				"fixedUserForm"
+			],
+			[
+				"lis",
+				"listArray"
+			],
+			[
+				"draw_",
+				"draw_active"
+			],
+			[
+				"fin",
+				"finalResult"
+			],
+			[
+				"che",
+				"check"
+			],
+			[
+				"final",
+				"finalResult"
+			],
+			[
+				"run",
+				"runs"
+			],
+			[
+				"build",
+				"buildString"
+			],
+			[
+				"fi",
+				"finishedString"
+			],
+			[
+				"fini",
+				"finishedString"
+			],
+			[
+				"fina",
+				"finalResult"
+			],
+			[
+				"fou",
+				"foundUsers"
+			],
+			[
+				"currentl",
+				"currentl"
+			],
+			[
+				"mo",
+				"moreDamnFunctions"
+			],
+			[
+				"hs",
+				"hashvalue"
+			],
+			[
+				"chek",
+				"checkName"
+			],
+			[
+				"list",
+				"listArray"
+			],
+			[
+				"temp",
+				"tempid"
+			],
+			[
+				"auth",
+				"authoriseUser2"
+			],
+			[
+				"ent",
+				"enteredPassword"
+			],
+			[
+				"pass",
+				"password"
+			],
+			[
+				"author",
+				"authoriseUser"
+			],
+			[
+				"a",
+				"authorisedusers"
+			],
+			[
+				"check",
+				"checkUsername"
+			],
+			[
+				"priv",
+				"privfileName"
+			],
+			[
+				"cont",
+				"content"
+			],
+			[
+				"ser",
+				"servError"
+			],
+			[
+				"err",
+				"errorMessage"
+			],
+			[
+				"car",
+				"cardRfid"
+			],
+			[
+				"fra",
+				"frame	Tag"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "/Users/davidwrigley/Documents/mpide/libraries/chipKITEthernet/utility/TCPIP Stack/TCPIPConfigTemplate.h",
+			"settings":
+			{
+				"buffer_size": 21931,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/davidwrigley/Documents/mpide/libraries/chipKITEthernet/utility/TCPIPConfig.h",
+			"settings":
+			{
+				"buffer_size": 22328,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/davidwrigley/Documents/mpide/libraries/chipKITEthernet/utility/TCP.c",
+			"settings":
+			{
+				"buffer_size": 167724,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/Users/davidwrigley/Documents/mpide/libraries/chipKITEthernet/utility/chipKITEthernetAPI.c",
+			"settings":
+			{
+				"buffer_size": 48719,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"selected_items":
+		[
+			[
+				"syn c",
+				"Set Syntax: C"
+			],
+			[
+				"syn mar",
+				"Set Syntax: Markdown"
+			],
+			[
+				"remo",
+				"Package Control: Remove Package"
+			],
+			[
+				"packa",
+				"Package Control: List Packages"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"pyth",
+				"Set Syntax: Python"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"remov",
+				"Package Control: Remove Package"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"pack",
+				"Package Control: Remove Package"
+			],
+			[
+				"git",
+				"Package Control: Install Package"
+			],
+			[
+				"pyh",
+				"Set Syntax: Python"
+			],
+			[
+				"pyt",
+				"Set Syntax: Python"
+			],
+			[
+				"apple",
+				"Set Syntax: AppleScript"
+			],
+			[
+				"syn ja",
+				"Set Syntax: JavaScript"
+			],
+			[
+				"syn java",
+				"Set Syntax: JavaScript"
+			],
+			[
+				"insta ",
+				"Package Control: Install Package"
+			],
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"sy ht",
+				"Set Syntax: HTML"
+			],
+			[
+				"syn css",
+				"Set Syntax: CSS"
+			],
+			[
+				"syn js",
+				"Set Syntax: JavaScript"
+			],
+			[
+				"syn pyt",
+				"Set Syntax: Python"
+			]
+		],
+		"width": 449.0
+	},
+	"console":
+	{
+		"height": 167.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/davidwrigley/Downloads/employees.sql",
+		"/Users/davidwrigley/Dropbox/Fourth Year/Semester 2/ENGG4802/Programs/chipKIT/RGB_TEST/pin_out.h",
+		"/Users/davidwrigley/Dropbox/Summer/Gumball/Mirror USB/for Pi/shell/Python/door.log",
+		"/Users/davidwrigley/Library/Application Support/Sublime Text 2/Packages/Default/Preferences.sublime-settings",
+		"/Users/davidwrigley/Dropbox/Summer/Gumball/nodestuff/public/fullcalendar-1.6.4/fullcalendar/fullcalendar.js",
+		"/Users/davidwrigley/Dropbox/Summer/Gumball/LICENSE.txt",
+		"/Users/davidwrigley/Library/Containers/com.apple.mail/Data/Library/Mail Downloads/C630CD01-D0E4-4587-8F46-CFFC4CC02CB8/Mail Attachment.ics",
+		"/Users/davidwrigley/Dropbox/Summer/Gumball/nodestuff/public/table.css",
+		"/Users/davidwrigley/Dropbox/Summer/Gumball/nodestuff/public/table_round.html",
+		"/Users/davidwrigley/Dropbox/Summer/Gumball/nodestuff/public/userdata.html",
+		"/Users/davidwrigley/Dropbox/Summer/Gumball/nodestuff/public/iframeFunction.js",
+		"/Users/davidwrigley/Dropbox/Summer/Gumball/nodestuff/public/manageusers.html",
+		"/Users/davidwrigley/Dropbox/Summer/Gumball/nodestuff/public/check.html",
+		"/Users/davidwrigley/Dropbox/Summer/Gumball/Mirror USB/shell/Python side/screen.py",
+		"/Users/davidwrigley/Library/Application Support/Sublime Text 2/Packages/SublimeClang/SublimeClang.sublime-settings",
+		"/Users/davidwrigley/Library/Application Support/Sublime Text 2/Packages/User/Preferences.sublime-settings",
+		"/Users/davidwrigley/Gumball/Mirror USB/for Pi/shell/mirror_osx.sh",
+		"/Users/davidwrigley/Gumball/Autologin/login.applescript",
+		"/Users/davidwrigley/Gumball/nodestuff/public/aboutme.html",
+		"/Users/davidwrigley/Gumball/nodestuff/public/index.html",
+		"/Users/davidwrigley/Gumball/nodestuff/public/autoResize.js",
+		"/Users/davidwrigley/Gumball/nodestuff/public/style.css",
+		"/Users/davidwrigley/Gumball/nodestuff/public/IframeFunction.js",
+		"/Users/davidwrigley/Gumball/nodestuff/public/userdata.html",
+		"/Users/davidwrigley/Gumball/nodestuff/public/manageusers.html",
+		"/Users/davidwrigley/Gumball/nodestuff/private/authorisedusers.txt",
+		"/Users/davidwrigley/Gumball/nodestuff/manageusers.html",
+		"/Users/davidwrigley/Gumball/nodestuff/public/check.html",
+		"/Users/davidwrigley/Gumball/nodestuff/public/registerSubmit.html",
+		"/Users/davidwrigley/Gumball/nodestuff/public/style2.css",
+		"/Users/davidwrigley/Gumball/nodestuff/public/reset.html",
+		"/Users/davidwrigley/Gumball/nodestuff/public/check_form.html",
+		"/Users/davidwrigley/Gumball/nodestuff/public/frame_check.html",
+		"/Users/davidwrigley/Gumball/nodestuff/app.js",
+		"/private/var/folders/rj/b7nh7hf51csdkkj0b1jtqg680000gn/T/4c72c897-6e47-4720-b140-6e081a3a28a2/home/pi/Desktop/shell/Python side/mqqt.py",
+		"/Users/davidwrigley/Dropbox/Summer/Mirror USB/shell/mirror_osx.sh",
+		"/Users/davidwrigley/Desktop/houses",
+		"/Users/davidwrigley/Dropbox/Summer/nodestuff/package.json",
+		"/Users/davidwrigley/Dropbox/Summer/nodestuff/index.html",
+		"/Users/davidwrigley/Dropbox/Summer/Mirror USB/shell/mod_osx.sh",
+		"/Users/davidwrigley/Dropbox/Summer/Mirror USB/shell/Python side/mqqt.py"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"1460",
+			"TCP_ETH_RAM_SIZE",
+			"21040",
+			"STACK_USE_BERKELEY_API",
+			"TCPSocketInitializer",
+			"wRXBufferSize",
+			"1000",
+			"536",
+			"socket",
+			"socket ram size",
+			"TCP_ETH_RAM_SIZE",
+			"TCP_ETH_RAM",
+			"536",
+			"prevcolour",
+			"colour",
+			"brightness",
+			"incomingBy",
+			"myString",
+			"SpiSend",
+			"arduino",
+			"update",
+			"%g",
+			"replace",
+			"print",
+			"logging",
+			"logger",
+			"print",
+			"mqqtc",
+			"publish",
+			"buildtable",
+			"fillhou",
+			"fill",
+			"fillhou",
+			"padding",
+			"parse",
+			"SortedKeys",
+			"eof",
+			"tab",
+			"buildUser",
+			"console.",
+			"consol.log",
+			"}\n",
+			"register",
+			"user",
+			"servMessage",
+			"servError",
+			"rfidTag",
+			"%CARDRFID%_",
+			"%CARDRFID%",
+			"\"",
+			"%RFID%",
+			"indent",
+			"lock++;",
+			"User",
+			"finalResult[i]",
+			"finishedString",
+			"check",
+			"final",
+			"hashvalue",
+			"tempid",
+			"autherised",
+			"manage.html",
+			".html",
+			"reset",
+			"check.html",
+			"userdata.html",
+			"frame",
+			"listArray[l]",
+			"unregistered",
+			"obj",
+			"msg",
+			"toString",
+			"obj3",
+			"colour",
+			"run",
+			"the end",
+			"id = ",
+			"id = data",
+			"id =",
+			"id -",
+			"id ",
+			"HID",
+			"KERNEL-OS"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"finishedString"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": true,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 1,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "/Users/davidwrigley/Documents/mpide/libraries/chipKITEthernet/utility/TCPIP Stack/TCPIPConfigTemplate.h",
+					"settings":
+					{
+						"buffer_size": 21931,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								12706,
+								12722
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 5579.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "/Users/davidwrigley/Documents/mpide/libraries/chipKITEthernet/utility/TCPIPConfig.h",
+					"settings":
+					{
+						"buffer_size": 22328,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								14386,
+								14386
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 6825.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/Users/davidwrigley/Documents/mpide/libraries/chipKITEthernet/utility/TCP.c",
+					"settings":
+					{
+						"buffer_size": 167724,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5064,
+								5064
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 2274.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/Users/davidwrigley/Documents/mpide/libraries/chipKITEthernet/utility/chipKITEthernetAPI.c",
+					"settings":
+					{
+						"buffer_size": 48719,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 3112.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 39.0
+	},
+	"input":
+	{
+		"height": 39.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 400.0
+	},
+	"replace":
+	{
+		"height": 72.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"iff",
+				"nodestuff/public/iframeFunction.js"
+			],
+			[
+				"mana",
+				"nodestuff/public/manageusers.html"
+			],
+			[
+				"door",
+				"Mirror USB/for Pi/shell/Python/door.py"
+			],
+			[
+				"chec",
+				"nodestuff/public/check.html"
+			],
+			[
+				"scree",
+				"Mirror USB/shell/Python side/screen.py"
+			],
+			[
+				"gum",
+				"Mirror USB/for Pi/shell/Python/gumball.py"
+			],
+			[
+				"doo",
+				"Mirror USB/for Pi/shell/Python/door.py"
+			],
+			[
+				"table",
+				"nodestuff/public/table_round.html"
+			],
+			[
+				"app",
+				"nodestuff/app.js"
+			],
+			[
+				"inde",
+				"nodestuff/public/index.html"
+			],
+			[
+				"py",
+				"Mirror USB/shell/Python side/mqqt.py"
+			],
+			[
+				"mirr",
+				"mirror_osx.sh"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 198.0,
+	"status_bar_visible": true
+}

@@ -15,9 +15,11 @@ BUFFER_SIZE = 1024
 UserSelect = 0
 layer = 0
 pixel = 0
-red = '0'
-green = '0'
-blue = '0'
+red = 8
+green = 8
+blue = 8
+mode = 4
+pulsedirection = 1
 
 def connect(IP, Port):
     """
@@ -88,34 +90,108 @@ if __name__ == '__main__':
             # 1, insted of 51 (or whatever) has value 1
             message += ( str(unichr(int(layer))) + str(unichr(int(pixel))) + str(unichr(int(red))) + str(unichr(int(green))) + str(unichr(int(blue))) )
         else:
-            print "Send! " + str(layer) + " " + str(pixel) + " Red"
-            time.sleep(.000001)
-            for a in range(0,1):
-                message += ( str(unichr(int(str(randint(0,8))))) + str(unichr(int(str(randint(0,63))))) + str(unichr(int(red))) +str(unichr(int(green))) + str(unichr(int(blue))) )
-                pixel += 1
-                red = str(randint(0,8))
-                green = str(randint(0,8))
-                blue = str(randint(0,8))
-                message += ( str(unichr(int(str(randint(0,8))))) + str(unichr(int(str(randint(0,63))))) + str(unichr(int('0'))) +str(unichr(int('0'))) + str(unichr(int('0'))) )
+            # Random Pixel, Random Off
+            if(mode == 0):
+                print "Random"
+                time.sleep(.1)
+                for a in range(0,512):
+                    message += ( str(unichr(int(str(randint(0,8))))) + str(unichr(int(str(randint(0,63))))) + str(unichr(int(red))) +str(unichr(int(green))) + str(unichr(int(blue))) )
+                    pixel += 1
+                    red = randint(0,8)
+                    green = randint(0,8)
+                    blue = randint(0,8)
+                    message += ( str(unichr(int(str(randint(0,8))))) + str(unichr(int(str(randint(0,63))))) + str(unichr(int('0'))) +str(unichr(int('0'))) + str(unichr(int('0'))) )
+            
+            # Pulse.
+            if(mode == 1): 
+                print "Pulse" + str(red) + str(green) + str(blue)  
+                time.sleep(.1)
+                for a in range(0,512):     
+                    if(pixel == 64):
+                        layer += 1
+                        pixel = 0
+                        if(layer == 8):
+                            layer = 0
+                            
+                            if(green == 0):
+                                pulsedirection = 1
+                            elif(green == 8):
+                                pulsedirection = -1
+                            
+                            red += pulsedirection
 
-                if(pixel == 64):
-                    layer += 1
-                    pixel = 0
-                    if(layer == 8):
-                        layer = 0
-                        if(red == '0'):
-                            red = '8'
-                        else:
-                            red = '0'
-                        if(green == '0'):
-                            green = '8'
-                        else:
-                            green = '0'
-                        if(blue == '0'):
-                            blue = '8'
-                        else:
-                            blue = '0'
+                            green += pulsedirection
 
+                            blue += pulsedirection
+
+                    message += ( str(unichr(int(layer))) + str(unichr(int(pixel))) + str(unichr(int(red))) + str(unichr(int(green))) + str(unichr(int(blue))) )
+                    pixel += 1
+
+            # Cube ON OFF
+            if(mode == 2):
+                print "On Off"
+                time.sleep(1)
+                for a in range(0,512):
+                    message += ( str(unichr(int(layer))) + str(unichr(int(pixel))) + str(unichr(int(red))) +str(unichr(int(green))) + str(unichr(int(blue))) )
+                    pixel += 1
+
+                    if(pixel == 64):
+                        layer += 1
+                        pixel = 0
+                        if(layer == 8):
+                            layer = 0
+                            if(red == 0):
+                                red = 8
+                            else:
+                                red = 0
+
+                            if(green == 0):
+                                green = 8
+                            else:
+                                green = 0
+
+                            if(blue == 0):
+                                blue = 8
+                            else:
+                                blue = 0
+
+            if(mode == 3):
+                print "Random"
+                time.sleep(.1)
+                for a in range(0,512):
+                    message += ( str(unichr(int(str(randint(0,8))))) + str(unichr(int(str(randint(0,63))))) + str(unichr(int(red))) +str(unichr(int(green))) + str(unichr(int(blue))) )
+                    pixel += 1
+                    red = randint(0,8)
+                    green = randint(0,8)
+                    blue = randint(0,8)
+
+            if(mode == 4):
+                print "One at a time"
+                time.sleep(.1)
+                for a in range(0,1):
+                    message += ( str(unichr(int(layer))) + str(unichr(int(pixel))) + str(unichr(int(red))) +str(unichr(int(green))) + str(unichr(int(blue))) )
+                    pixel += 1
+
+                    if(pixel == 64):
+                        layer += 1
+                        pixel = 0
+                        if(layer == 8):
+                            layer = 0
+                            if(red == 0):
+                                red = 8
+                            else:
+                                red = 0
+
+                            if(green == 0):
+                                green = 8
+                            else:
+                                green = 0
+
+                            if(blue == 0):
+                                blue = 8
+                            else:
+                                blue = 0
+                    
             #time.sleep(.2)
         # try to send the message, if failur, then re-connect
         try:

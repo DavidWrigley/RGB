@@ -19,9 +19,9 @@ Digital pin 36 = E 1
 Digital pin 37 = E 0 
 */
 
-#define pinSS 0b00000001 // 1 pin 36
-#define pinSCK 0b00000010 // 2 pin 35
+#define pinSS    0b00000001 // 1 pin 36
+#define pinSCK   0b00000010 // 2 pin 35
 #define pinMOSIR 0b00000100 // 3 pin 34
 #define pinMOSIG 0b00001000 // 4 pin 33
 #define pinMOSIB 0b00010000 // 5 pin 32
-#define pinOE 0b00100000 // 6 pin 31
+#define pinOE 	 0b00100000 // 6 pin 31

@@ -308,8 +308,12 @@ uint32_t bamCallback(uint32_t currentTime) {
         }
     }
 
+    //LATESET = pinOE;
+
     // send the colours
     SpiSend(spiRed, spiGreen, spiBlue);
+
+    //LATECLR = pinOE;
     
     // reset the colours
     spiRed = 0;
@@ -349,6 +353,7 @@ uint32_t layerCallback(uint32_t currentTime) {
     spiBlue = 0;
     // force the colour high, as it may still be low from last layer
     SpiSend(0x0000000000000000,0x0000000000000000,0x0000000000000000);
+    // LATESET = pinOE;
     // SpiSend(0xFFFFFFFFFFFFFFFF,0xFFFFFFFFFFFFFFFF,0xFFFFFFFFFFFFFFFF);
 
     // turn off the last layer
@@ -360,6 +365,7 @@ uint32_t layerCallback(uint32_t currentTime) {
 
     // eneable the next layer
     digitalWrite(layerArray[layerPossitionCounter], 0);
+    // LATECLR = pinOE;
 
     /* HOME TEST
     // turn off the last layer HOME TEST
