@@ -392,31 +392,6 @@ extern "C"
 {
     void __ISR(_TIMER_3_VECTOR,ipl2) playSa(void)
     {    
-        if(pixelteston == 1) {
-            // if red test is on, set the red pixel
-            if(testredpixel == 1) {
-                ledArray[currenttestlayer][currenttestpixel][0] = 8;
-            }
-            // if green test is on, set the green pixel
-            if(testgreenpixel == 1) {
-                ledArray[currenttestlayer][currenttestpixel][1] = 8;
-            }
-            // if blue test is on, set the blue pixel
-            if(testbluepixel == 1) {
-                ledArray[currenttestlayer][currenttestpixel][2] = 8;
-            }
-            // if the currentpixel is at its max, 63, reset it to 0 and switch layer
-            if(currenttestpixel == 63) {
-                // increment the layer
-                currenttestlayer += 1;
-                // set the current pixel back to zero
-                currenttestpixel = 0;
-            }
-            // check the layer is not past its maximum of 8 if it is, set it back to zero
-            if(currenttestlayer == 8) {
-                currenttestlayer = 0;
-            }
-        }
         INTClearFlag(INT_T3);
     }
 } 

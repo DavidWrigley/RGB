@@ -18,8 +18,8 @@ BUFFER_SIZE = 1024
 #global varables
 fd = sys.stdin.fileno()
 currentSnake = []
-snakeHistory = []
 currentPellet = []
+score = 0
 # x direction y direction z direction
 global snakeDirection 
 
@@ -92,61 +92,96 @@ class keyEvent(threading.Thread):
                     keypress = c
                     print "got: %c" %keypress
 
-                    if(keypress == 'e'):
-                        # controls y upward direction
-                        if(snakeDirection[1] == 0):
-                            snakeDirection[1] = 1
-                        elif(snakeDirection[1] == -1):
-                            snakeDirection[1] = 0
-                        else:
-                            print "Already going up"
+                    #if its going in the x direction it can go in the y or z
+                    if(snakeDirection[0] != 0):
+                        if(keypress == 'i'):
+                            # controls y upward direction
+                            if(snakeDirection[1] == 0):
+                                snakeDirection[0] = 0
+                                snakeDirection[1] = 1
+                                snakeDirection[2] = 0
                     
-                    elif(keypress == 'q'):
-                        # controls y downward direction
-                        if(snakeDirection[1] == 0):
-                            snakeDirection[1] = -1
-                        elif(snakeDirection[1] == 1):
-                            snakeDirection[1] = 0
-                        else:
-                            print "Already going down"
+                        elif(keypress == 'k'):
+                            # controls y downward direction
+                            if(snakeDirection[1] == 0):
+                                snakeDirection[0] = 0
+                                snakeDirection[1] = -1
+                                snakeDirection[2] = 0
 
-                    elif(keypress == 'w'):
-                        # controls z positive direction                            
-                        if(snakeDirection[2] == 0):
-                            snakeDirection[2] = 1
-                        elif(snakeDirection[2] == -1):
-                            snakeDirection[2] = 0
-                        else:
-                            print "Already going forward (z)"
+                        elif(keypress == 'w'):
+                            # controls z positive direction                            
+                            if(snakeDirection[2] == 0):
+                                snakeDirection[0] = 0
+                                snakeDirection[1] = 0
+                                snakeDirection[2] = 1
 
-                    elif(keypress == 's'):
-                        # controls z negative direction                            
-                        if(snakeDirection[2] == 0):
-                            snakeDirection[2] = -1
-                        elif(snakeDirection[2] == 1):
-                            snakeDirection[2] = 0
-                        else:
-                            print "Already going backward (z)"
+                        elif(keypress == 's'):
+                            # controls z negative direction                            
+                            if(snakeDirection[2] == 0):
+                                snakeDirection[0] = 0
+                                snakeDirection[1] = 0
+                                snakeDirection[2] = -1
 
-                    elif(keypress == 'd'):
-                        # controls x positive direction                            
-                        if(snakeDirection[0] == 0):
-                            snakeDirection[0] = 1
-                        elif(snakeDirection[0] == -1):
-                            snakeDirection[0] = 0
-                        else:
-                            print "Already going forward (x)"
+                    #if the snake is going in the y direction can go in x and z
+                    elif(snakeDirection[1] != 0):
+                        if(keypress == 'w'):
+                            # controls z positive direction                            
+                            if(snakeDirection[2] == 0):
+                                snakeDirection[0] = 0
+                                snakeDirection[1] = 0
+                                snakeDirection[2] = 1
 
-                    elif(keypress == 'a'):
-                        # controls z positive direction                            
-                        if(snakeDirection[0] == 0):
-                            snakeDirection[0] = -1
-                        elif(snakeDirection[0] == 1):
-                            snakeDirection[0] = 0
-                        else:
-                            print "Already going backward (x)"
+                        elif(keypress == 's'):
+                            # controls z negative direction                            
+                            if(snakeDirection[2] == 0):
+                                snakeDirection[0] = 0
+                                snakeDirection[1] = 0
+                                snakeDirection[2] = -1
+                        
+                        elif(keypress == 'd'):
+                            # controls x positive direction                            
+                            if(snakeDirection[0] == 0):
+                                snakeDirection[0] = 1
+                                snakeDirection[1] = 0
+                                snakeDirection[2] = 0
 
-                    print "DIR: %d, %d, %d"  %(snakeDirection[0], snakeDirection[1], snakeDirection[2])
+                        elif(keypress == 'a'):
+                            # controls z positive direction                            
+                            if(snakeDirection[0] == 0):
+                                snakeDirection[0] = -1
+                                snakeDirection[1] = 0
+                                snakeDirection[2] = 0
+
+                    elif(snakeDirection[2] != 0):
+                        if(keypress == 'd'):
+                            # controls x positive direction                            
+                            if(snakeDirection[0] == 0):
+                                snakeDirection[0] = 1
+                                snakeDirection[1] = 0
+                                snakeDirection[2] = 0
+
+                        elif(keypress == 'a'):
+                            # controls z positive direction                            
+                            if(snakeDirection[0] == 0):
+                                snakeDirection[0] = -1
+                                snakeDirection[1] = 0
+                                snakeDirection[2] = 0
+
+                        elif(keypress == 'i'):
+                            # controls y upward direction
+                            if(snakeDirection[1] == 0):
+                                snakeDirection[0] = 0
+                                snakeDirection[1] = 1
+                                snakeDirection[2] = 0
+                    
+                        elif(keypress == 'k'):
+                            # controls y downward direction
+                            if(snakeDirection[1] == 0):
+                                snakeDirection[0] = 0
+                                snakeDirection[1] = -1
+                                snakeDirection[2] = 0
+
+                    #print "DIR: %d, %d, %d"  %(snakeDirection[0], snakeDirection[1], snakeDirection[2])
                     
                 except IOError: 
                     pass
@@ -171,7 +206,7 @@ def translate(x,y,z,r,g,b):
     # 0 1 2 3 4 5 6 7
     zBase = [0, 1, 2, 3, 4, 5, 6, 7]
 
-    print "Layer: %d Pixel: %d R: %d G: %d B: %d" %(yBase[y], (xBase[x]+zBase[z]), r, g, b)
+    #print "Layer: %d Pixel: %d R: %d G: %d B: %d" %(yBase[y], (xBase[x]+zBase[z]), r, g, b)
     return ( str(unichr(int(yBase[y]))) + str(unichr(int(xBase[x] + zBase[z]))) + str(unichr(int(r))) + str(unichr(int(g))) + str(unichr(int(b))) )
 
 def sendData(data):
@@ -229,10 +264,21 @@ if __name__ == '__main__':
     currentSnake.append([0,0,0])
 
     print "making pellet"
-    currentPellet = [2,7,0]
+    currentPellet = [randint(0,7),randint(0,7),randint(0,7)]
 
     while True:
+        """
+        message = ""
+        for a in range(0,8):
+            for b in range(0,8):
+                for c in range(0,8):
+                    message += translate(a,b,c,0,0,0)
+        sendData(message)
+        """
+        message = ""
         # Update the "head" of the snake
+        # this little multiplication gets around the stupid mutable feature of 
+        # python lits, the dumbest thing in python.
         currentSnake.insert(0,currentSnake[0:1][0]*1)
         
         currentSnake[0][0] += snakeDirection[0]
@@ -255,22 +301,64 @@ if __name__ == '__main__':
         if(currentSnake[0][2] < 0):
             currentSnake[0][2] = 7
 
+        # check for death.
+        for i in range(0,len(currentSnake)):
+            #pass on the first run through as the head will equal itself
+            if(i == 0):
+                pass
+            else:
+                if(currentSnake[0] == currentSnake[i]):
+                    print "you died score: %s" %score
+                    score = 0
+                    del(currentSnake)
+                    currentSnake = []
+                    currentSnake.append([2,0,0])
+                    currentSnake.append([1,0,0])
+                    currentSnake.append([0,0,0])
+                    currentSnake.append([0,0,0])
+                    message = ""
+                    for a in range(0,8):
+                        for b in range(0,8):
+                            for c in range(0,8):
+                                message += translate(a,c,b,randint(0,8),randint(0,8),randint(0,8))
+                            time.sleep(.01)
+                            sendData(message)
+                            message = ""
+
+                    message = ""
+                    for a in range(0,8):
+                        for b in range(0,8):
+                            for c in range(0,8):
+                                message += translate(a,c,b,0,0,0)
+                            sendData(message)
+                            message = ""
+                    break
+
         if(currentPellet == currentSnake[0]):
-            # if not, do not zero out the pixel and allow the snake to extend
+            # if you get the pellet do not zero out the pixel and allow the snake to extend
+            # make a new pellet
+            currentPellet = [randint(0,7),randint(0,7),randint(0,7)]
+            score += 1
             pass
         else:
-            # if you dont get a pellet, zero out the last pixel
+            # if you dont get a pellet, zero out the last pixel of the snake and pop it off
             message += translate(currentSnake[-1][0],currentSnake[-1][1],currentSnake[-1][2],0,0,0)
             currentSnake.pop()
 
         for i in range(len(currentSnake)):
-            message += translate(currentSnake[i][0],currentSnake[i][1],currentSnake[i][2],8,0,0)
+            if(i == 0):
+                message += translate(currentSnake[i][0],currentSnake[i][1],currentSnake[i][2],0,8,0)
+            else:
+                message += translate(currentSnake[i][0],currentSnake[i][1],currentSnake[i][2],8,0,0)
 
-        print currentSnake
-        print message
+        # add the pellet
+        message += translate(currentPellet[0],currentPellet[1],currentPellet[2],8,8,8) 
+        
+        #print currentSnake
+        #print message
 
+        # send the data
         sendData(message)
-
-        time.sleep(1)   
+        time.sleep(.4)   
     
     
