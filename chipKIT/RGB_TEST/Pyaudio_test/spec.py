@@ -13,21 +13,80 @@ import matplotlib.animation as animation
 import pyaudio
 import struct
 import wave
+import socket
+import time
+import random as randint
  
 SAVE = 0.0
 TITLE = ''
 FPS = 30.0
  
+#nFFT = 64
 nFFT = 512
-#nFFT = 128
 BUF_SIZE = 4 * nFFT
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 44100
- 
+#RATE = 22000
+
+# Socket Varables
+TCP_IP = "130.102.86.142"
+#TCP_IP = "192.168.1.107"
+TCP_PORT = 8888
+
+#previous dft values
+global prev
+set_point = 30
+
+def connect(IP, Port):
+    """
+    Connects a TCP/IP socket to the entered IP and Port
+    """
+    try:
+        sock.connect((TCP_IP, TCP_PORT))
+        return 0
+    except socket.timeout:
+        time.sleep(4)
+        return 1
+
+def ensure_Connect():
+    """
+    ensures the socket connects with a while loop
+    that will not return till 0 is received from the connection
+    function (i.e. the socket has not encountered and error)
+    """
+    while (connect(TCP_IP,TCP_PORT)):
+        print "timeout"
+    print "connected"
+
+def translate(x,y,z,r,g,b):
+    # x will be pixels along the front face
+    # 0 8 16 24 32 40 48 56 pixels
+    xBase = [0, 8, 16, 24, 32, 40, 48, 56]
+
+    # y will be layers 
+    # 0 1 2 3 4 5 6 7 layers
+    yBase = [0, 1, 2, 3, 4, 5, 6, 7]
+
+    # z will be pixels
+    # 0 1 2 3 4 5 6 7
+    zBase = [0, 1, 2, 3, 4, 5, 6, 7]
+
+    #print "Layer: %d Pixel: %d R: %d G: %d B: %d" %(yBase[y], (xBase[x]+zBase[z]), r, g, b)
+    return ( str(unichr(int(yBase[y]))) + str(unichr(int(xBase[x] + zBase[z]))) + str(unichr(int(r))) + str(unichr(int(g))) + str(unichr(int(b))) )
+
+def sendData(data):
+    # try to send the message, if failur, then re-connect
+    try:
+        sock.send(data)
+    except socket.error:
+        print "disconnected, atempting reconnect"
+        ensure_Connect()
+        sock.send(data)
  
 def animate(i, line, stream, wf, MAX_y):
  
+  global prev
   # Read n*nFFT frames from stream, n > 0
   N = max(stream.get_read_available() / nFFT, 1) * nFFT
   data = None
@@ -46,9 +105,77 @@ def animate(i, line, stream, wf, MAX_y):
  
   Y_L = np.fft.fft(y_L, nFFT)
   Y_R = np.fft.fft(y_R, nFFT)
- 
+  
   # Sewing FFT of two channels together, DC part uses right channel's
   Y = abs(np.hstack((Y_L[-nFFT/2:-1], Y_R[:nFFT/2])))
+
+  Y_left = Y[(len(Y)/2):((len(Y)/2)+(len(Y)/4))]
+
+  #print Y_left
+  # sum up the bins to be displayed
+  average_bins = []
+  placeholder = 1
+  increment = len(Y_left)/8
+  for a in range(0,8):
+    average_bins.append(sum(Y_left[placeholder:placeholder+increment]))
+    placeholder = placeholder+increment
+
+  #print average_bins
+
+  # calculate the average power
+  totalSum = 0
+  for a in average_bins:
+    totalSum += a
+
+  average_power = totalSum/len(average_bins)
+  #print "Average Power: " + str(average_power)
+
+  # create message
+  message = ""
+
+  if(len(prev) > 8):
+    prev.pop(0)
+
+  colour = [ [8,0,0],
+             [8,2,0],
+             [4,4,0],
+             [0,8,0],
+             [0,4,4],
+             [0,0,8],
+             [3,0,8],
+             [8,0,2] ]
+
+  print colour
+
+  # clear previous info
+  hist = 0;
+  for a in reversed(prev):
+    row = 0
+    for b in a:
+      level = int(round(b/set_point))
+      if(level > 7):
+        level = 7
+      print "hist: %d Level: %d Row: %d" %(hist,level,row)
+      message += translate(hist,level,row,0,0,0)
+      if(hist < 7):
+        message += translate(hist+1,level,row,colour[row][0],colour[row][1],colour[row][2])
+      row += 1
+    hist += 1
+
+  # display current data on cube
+  row = 0
+  for a in average_bins:
+    level = int(round(a/set_point))
+    if(level > 7):
+      level = 7
+    #print level
+    message += translate(0,level,row,colour[row][0],colour[row][1],colour[row][2])
+    row += 1
+
+  sendData(message)
+
+  # set previous state
+  prev.append(average_bins)
  
   line.set_ydata(Y)
   return line,
@@ -123,4 +250,25 @@ def main():
  
  
 if __name__ == '__main__':
+  prev = []
+  print "Connecting to Cube"
+  sock = socket.socket(socket.AF_INET, # Internet
+      socket.SOCK_STREAM) # TCP
+  sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+  sock.settimeout(5)
+  sock.bind(('',0))
+
+  print "TCP"
+  # connect the socket to the microcontroller
+  ensure_Connect()
+
+  print "clearning cube"
+  message = ""
+  for a in range(0,8):
+    for b in range(0,8):
+      for c in range(0,8):
+        message += translate(a,b,c,0,0,0)
+  sendData(message)
+
+  print "starting visulisation"
   main()

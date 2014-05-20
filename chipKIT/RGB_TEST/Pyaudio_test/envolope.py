@@ -6,6 +6,7 @@ import matplotlib.animation as animation
 import pyaudio
 import struct
 import socket
+import time
 from random import randint
 
 # Socket Varables
@@ -18,7 +19,7 @@ TITLE = 'current envelope'
 FPS = 60
 
 setPoint = .01
-mode = 2
+mode = 3
 
 SIZE = 125
 BUF_SIZE = SIZE * 4
@@ -121,9 +122,32 @@ def animate(i, line, stream, wf, MAX_y):
 		else:
 			limiter = int(value)
 		
+		
 		for a in range(7,6-limiter,-1):
 			for b in range(0,limiter+1,1):
 				for c in range(7,6-limiter,-1):
+					message += translate(b,a,c,colour[0],colour[1],colour[2])
+
+		sendData(message)
+	elif(mode == 3):
+		# pulse
+		message = ""
+		#fixed block x,y,z
+		colour = [randint(0,8),randint(0,8),randint(0,8)]
+		value = round(max(y)*16)
+		limiter = 0
+		scale = 3
+
+		print "Value: " + str(value)
+
+		if(value > 4.0):
+			limiter = 4
+		else:
+			limiter = int(value)
+		
+		for a in range(3+limiter,3-limiter,-1):
+			for b in range(3+limiter,3-limiter,-1):
+				for c in range(3+limiter,3-limiter,-1):
 					message += translate(b,a,c,colour[0],colour[1],colour[2])
 
 		sendData(message)
