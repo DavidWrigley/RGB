@@ -1,9 +1,9 @@
 import socket
 import time
-import threading
 import signal
 import sys
 from random import randint
+import threading
 
 # Socket Varables
 TCP_IP = "130.102.86.142"
@@ -18,7 +18,8 @@ pixel = 0
 red = 8
 green = 8
 blue = 8
-mode = 1
+global mode
+mode = 0
 pulsedirection = 1
 
 def connect(IP, Port):

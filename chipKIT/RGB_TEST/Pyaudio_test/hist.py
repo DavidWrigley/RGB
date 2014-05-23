@@ -90,24 +90,6 @@ class keyEvent(threading.Thread):
             if(set_point > min_set_point):
               set_point -= 1
 
-          # Switch mode
-          if(keypress == "1"):
-            mode = 1
-            cube_reset()
-            prev = []
-          elif(keypress == "2"):
-            mode = 2
-            cube_reset()
-            prev = []
-          elif(keypress == "3"):
-            mode = 3
-            cube_reset()
-            prev = []
-          elif(keypress == "4"):
-            mode = 4
-            cube_reset()
-            prev = []
-
           print set_point
             
         except IOError: 
@@ -206,230 +188,69 @@ def animate(i, line, stream, wf, MAX_y):
                [8,0,2] ]
 
   if(mode == 1):
-    # this mode is complete dft based
-    Y_left = Y[(len(Y)/2):-1]
-    # print len(Y_left)
+    # this mode is histoty dft based (pretty cool)
+    Y_left = Y[(len(Y)/2):((len(Y)/2)+(len(Y)/4))]
 
+    #print Y_left
     # sum up the bins to be displayed
     average_bins = []
     placeholder = 0
-    increment = round(len(Y_left)/64)
-    for a in range(0,64):
+    increment = len(Y_left)/8
+    for a in range(0,8):
       average_bins.append(sum(Y_left[placeholder:placeholder+increment]))
       placeholder = placeholder+increment
 
+    #print average_bins
+
+    # calculate the average power
+    totalSum = 0
+    for a in average_bins:
+      totalSum += a
+
+    average_power = totalSum/len(average_bins)
+
+    # create message
     message = ""
 
-    # reset the previous frame
-    for a in prev:
-      message += translate(a[0],a[1],a[2],0,0,0)
+    # if the previous data is too long
+    if(len(prev) > 8):
+      # remove one from the 
+      prev.pop(0)
 
-    prev = []
+    # clear previous info
+    hist = 0;
+    for a in reversed(prev):
+      row = 0
+      for b in a:
+        level = b[1]
+        if(level > 7):
+          level = 7
+        #print "hist: %d Level: %d Row: %d" %(hist,level,row)
+        message += translate(hist,level,row,0,0,0)
+        if(hist < 7):
+          message += translate(hist+1,level,row,colour[row][0],colour[row][1],colour[row][2])
+        row += 1
+      hist += 1
 
-    # send new frame
-    bin = 0
-    for x in range(0,8):
-      for z in range(0,8):
-          level = int(round(average_bins[bin]/set_point))
-          if( level > 7):
-            level = 7
-          if level == 0:
-            setcolour = colour[0]
-          elif level == 1:
-            setcolour = colour[1]
-          elif level == 2:
-            setcolour = colour[2]
-          elif level == 3:
-            setcolour = colour[3]
-          elif level == 4:
-            setcolour = colour[4]
-          elif level == 5:
-            setcolour = colour[5]
-          elif level == 6:
-            setcolour = colour[6]
-          elif level == 7:
-            setcolour = colour[7]
-          message += translate(x,level,z,8,0,3)
-          prev.append([x,level,z])
-          bin += 1
-
-    sendData(message)
-  elif(mode == 2):
-    # this mode is complete dft based
-    Y_left = Y[(len(Y)/2)-1:(len(Y)/2 + len(Y)/4)]
-    # print len(Y_left)
-
-    # sum up the bins to be displayed
-    average_bins = []
-    placeholder = 0
-    increment = round(len(Y_left)/64)
-    for a in range(0,64):
-      average_bins.append(sum(Y_left[placeholder:placeholder+increment]))
-      placeholder = placeholder+increment
-
-    message = ""
-
-    # reset the previous frame
-    for a in prev:
-      message += translate(a[0],a[1],a[2],0,0,0)
-
-    prev = []
-
-    # send new frame
-    bin = 0
-    for x in range(0,8):
-      for z in range(0,8):
-          level = int(round(average_bins[bin]/set_point))
-          if( level > 7):
-            level = 7
-          if level == 0:
-            setcolour = colour[0]
-          elif level == 1:
-            setcolour = colour[1]
-          elif level == 2:
-            setcolour = colour[2]
-          elif level == 3:
-            setcolour = colour[3]
-          elif level == 4:
-            setcolour = colour[4]
-          elif level == 5:
-            setcolour = colour[5]
-          elif level == 6:
-            setcolour = colour[6]
-          elif level == 7:
-            setcolour = colour[7]
-          message += translate(x,level,z,setcolour[0],setcolour[1],setcolour[2])
-          prev.append([x,level,z])
-          bin += 1
+    # display current data on cube
+    row = 0
+    temparray = []
+    for a in average_bins:
+      level = int(round(a/(set_point*6)))
+      if(level > 7):
+        level = 7
+      #print level
+      message += translate(0,level,row,colour[row][0],colour[row][1],colour[row][2])
+      temparray.append([0,level,row])
+      row += 1
 
     sendData(message)
-
-  elif(mode == 3):
-    # this mode is complete dft based
-    Y_left = Y[(len(Y)/2):-1]
-
-    # sum up the bins to be displayed
-    average_bins = []
-    placeholder = 0
-    increment = round(len(Y_left)/64)
-    for a in range(0,64):
-      average_bins.append(sum(Y_left[placeholder:placeholder+increment]))
-      placeholder = placeholder+increment
-
-    message = ""
-
-    # reset the previous frame
-    for a in prev:
-      message += translate(a[0],a[1],a[2],0,0,0)
-
-    prev = []
-    # send new frame
-    bin = 0
-
-    # this will get you to the diagonal
-    for x in range(0,8):
-      for z in range(0,x+1):
-          level = int(round(average_bins[bin]/set_point))
-          if( level > 7):
-            level = 7
-          message += translate((x-z),level,z,0,8,1)
-          prev.append([(x-z),level,z])
-          bin += 1
-
-    for rows in range(1,8):
-      count = 0
-      for z in range(rows,8):
-          level = int(round(average_bins[bin]/set_point))
-          if( level > 7):
-            level = 7
-          message += translate((7-count),level,z,0,8,1)
-          prev.append([(7-count),level,z])
-          bin += 1
-          count += 1
-
-    sendData(message)
-
-  elif(mode == 4):
-    # this mode is complete dft based
-    Y_left = Y[(len(Y)/2)-1:(len(Y)/2 + len(Y)/4)]
-
-    # sum up the bins to be displayed
-    average_bins = []
-    placeholder = 0
-    increment = round(len(Y_left)/64)
-    for a in range(0,64):
-      average_bins.append(sum(Y_left[placeholder:placeholder+increment]))
-      placeholder = placeholder+increment
-
-    message = ""
-
-    # reset the previous frame
-    for a in prev:
-      message += translate(a[0],a[1],a[2],0,0,0)
-
-    # reset prev frame, only hold one frame at a time
-    prev = []
-    # send new frame
-    bin = 0
-
-    # this will get you to the diagonal
-    for x in range(0,8):
-      for z in range(0,x+1):
-          level = int(round(average_bins[bin]/set_point))
-          if( level > 7):
-            level = 7
-          if level == 0:
-            setcolour = colour[0]
-          elif level == 1:
-            setcolour = colour[1]
-          elif level == 2:
-            setcolour = colour[2]
-          elif level == 3:
-            setcolour = colour[3]
-          elif level == 4:
-            setcolour = colour[4]
-          elif level == 5:
-            setcolour = colour[5]
-          elif level == 6:
-            setcolour = colour[6]
-          elif level == 7:
-            setcolour = colour[7]
-          message += translate((x-z),level,z,setcolour[0],setcolour[1],setcolour[2])
-          prev.append([(x-z),level,z])
-          bin += 1
-
-    # need to do the other half of the triangle
-    for rows in range(1,8):
-      count = 0
-      for z in range(rows,8):
-          level = int(round(average_bins[bin]/set_point))
-          if( level > 7):
-            level = 7
-          if level == 0:
-            setcolour = colour[0]
-          elif level == 1:
-            setcolour = colour[1]
-          elif level == 2:
-            setcolour = colour[2]
-          elif level == 3:
-            setcolour = colour[3]
-          elif level == 4:
-            setcolour = colour[4]
-          elif level == 5:
-            setcolour = colour[5]
-          elif level == 6:
-            setcolour = colour[6]
-          elif level == 7:
-            setcolour = colour[7]
-          message += translate((7-count),level,z,setcolour[0],setcolour[1],setcolour[2])
-          prev.append([(7-count),level,z])
-          bin += 1
-          count += 1
-
-    sendData(message)
+    # set previous state
+    prev.append(temparray)
  
   line.set_ydata(Y)
   return line,
+ 
  
 def init(line):
  
