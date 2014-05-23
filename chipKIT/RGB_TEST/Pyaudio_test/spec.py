@@ -40,11 +40,20 @@ TCP_PORT = 8888
 #previous dft values
 global prev
 global set_point
-mode = 4
+global mode
+mode = 1
 set_point = 6
-max_set_point = 30
-min_set_point = 2
+max_set_point = 40
+min_set_point = 1
 fd = sys.stdin.fileno()
+
+def cube_reset():
+  message = ""
+  for a in range(0,8):
+    for b in range(0,8):
+      for c in range(0,8):
+        message += translate(a,b,c,0,0,0)
+  sendData(message)
 
 class keyEvent(threading.Thread):
 
@@ -63,6 +72,7 @@ class keyEvent(threading.Thread):
   
   def run(self):
     global set_point
+    global mode
     # key press captucre loop
     try:
       while self.runvar:
@@ -71,14 +81,36 @@ class keyEvent(threading.Thread):
           c = sys.stdin.read(1)
           #keypress = repr(c)
           keypress = c
-          print "got: %c" %keypress
 
+          # increment / decrement setpoint
           if(keypress == "w"):
             if(set_point < max_set_point):
               set_point += 1
           elif(keypress == "s"):
             if(set_point > min_set_point):
               set_point -= 1
+
+          # Switch mode
+          if(keypress == "1"):
+            mode = 1
+            cube_reset()
+            prev = []
+          elif(keypress == "2"):
+            mode = 2
+            cube_reset()
+            prev = []
+          elif(keypress == "3"):
+            mode = 3
+            cube_reset()
+            prev = []
+          elif(keypress == "4"):
+            mode = 4
+            cube_reset()
+            prev = []
+          elif(keypress == "5"):
+            mode = 5
+            cube_reset()
+            prev = []
 
           print set_point
             
@@ -127,7 +159,10 @@ def translate(x,y,z,r,g,b):
     zBase = [0, 1, 2, 3, 4, 5, 6, 7]
 
     #print "Layer: %d Pixel: %d R: %d G: %d B: %d" %(yBase[y], (xBase[x]+zBase[z]), r, g, b)
-    return ( str(unichr(int(yBase[y]))) + str(unichr(int(xBase[x] + zBase[z]))) + str(unichr(int(r))) + str(unichr(int(g))) + str(unichr(int(b))) )
+    try:
+      return ( str(unichr(int(yBase[y]))) + str(unichr(int(xBase[x] + zBase[z]))) + str(unichr(int(r))) + str(unichr(int(g))) + str(unichr(int(b))) )
+    except TypeError:
+      return 
 
 def sendData(data):
     # try to send the message, if failur, then re-connect
@@ -142,6 +177,7 @@ def animate(i, line, stream, wf, MAX_y):
  
   global prev
   global set_point
+  global mode
   # Read n*nFFT frames from stream, n > 0
   N = max(stream.get_read_available() / nFFT, 1) * nFFT
   data = None
@@ -177,8 +213,6 @@ def animate(i, line, stream, wf, MAX_y):
     # this mode is histoty dft based (pretty cool)
     Y_left = Y[(len(Y)/2):((len(Y)/2)+(len(Y)/4))]
 
-    set_point = 30
-
     #print Y_left
     # sum up the bins to be displayed
     average_bins = []
@@ -196,12 +230,13 @@ def animate(i, line, stream, wf, MAX_y):
       totalSum += a
 
     average_power = totalSum/len(average_bins)
-    print "Average Power: " + str(average_power)
 
     # create message
     message = ""
 
+    # if the previous data is too long
     if(len(prev) > 8):
+      # remove one from the 
       prev.pop(0)
 
     # clear previous info
@@ -209,7 +244,7 @@ def animate(i, line, stream, wf, MAX_y):
     for a in reversed(prev):
       row = 0
       for b in a:
-        level = int(round(b/set_point))
+        level = b[1]
         if(level > 7):
           level = 7
         #print "hist: %d Level: %d Row: %d" %(hist,level,row)
@@ -221,18 +256,20 @@ def animate(i, line, stream, wf, MAX_y):
 
     # display current data on cube
     row = 0
+    temparray = []
     for a in average_bins:
-      level = int(round(a/set_point))
+      level = int(round(a/(set_point*6)))
       if(level > 7):
         level = 7
       #print level
       message += translate(0,level,row,colour[row][0],colour[row][1],colour[row][2])
+      temparray.append([0,level,row])
       row += 1
 
     sendData(message)
 
     # set previous state
-    prev.append(average_bins)
+    prev.append(temparray)
 
   elif(mode == 2):
     # this mode is complete dft based
@@ -283,13 +320,59 @@ def animate(i, line, stream, wf, MAX_y):
           bin += 1
 
     sendData(message)
-
   elif(mode == 3):
     # this mode is complete dft based
-    Y_left = Y[(len(Y)/2):-1]
+    Y_left = Y[(len(Y)/2)-1:(len(Y)/2 + len(Y)/4)]
     # print len(Y_left)
 
-    print "length: %d"  %len(Y_left)
+    # sum up the bins to be displayed
+    average_bins = []
+    placeholder = 0
+    increment = round(len(Y_left)/64)
+    for a in range(0,64):
+      average_bins.append(sum(Y_left[placeholder:placeholder+increment]))
+      placeholder = placeholder+increment
+
+    message = ""
+
+    # reset the previous frame
+    for a in prev:
+      message += translate(a[0],a[1],a[2],0,0,0)
+
+    prev = []
+
+    # send new frame
+    bin = 0
+    for x in range(0,8):
+      for z in range(0,8):
+          level = int(round(average_bins[bin]/set_point))
+          if( level > 7):
+            level = 7
+          if level == 0:
+            setcolour = colour[0]
+          elif level == 1:
+            setcolour = colour[1]
+          elif level == 2:
+            setcolour = colour[2]
+          elif level == 3:
+            setcolour = colour[3]
+          elif level == 4:
+            setcolour = colour[4]
+          elif level == 5:
+            setcolour = colour[5]
+          elif level == 6:
+            setcolour = colour[6]
+          elif level == 7:
+            setcolour = colour[7]
+          message += translate(x,level,z,setcolour[0],setcolour[1],setcolour[2])
+          prev.append([x,level,z])
+          bin += 1
+
+    sendData(message)
+
+  elif(mode == 4):
+    # this mode is complete dft based
+    Y_left = Y[(len(Y)/2):-1]
 
     # sum up the bins to be displayed
     average_bins = []
@@ -332,7 +415,7 @@ def animate(i, line, stream, wf, MAX_y):
 
     sendData(message)
 
-  elif(mode == 4):
+  elif(mode == 5):
     # this mode is complete dft based
     Y_left = Y[(len(Y)/2)-1:(len(Y)/2 + len(Y)/4)]
 
@@ -501,12 +584,7 @@ if __name__ == '__main__':
   thread.start()
 
   print "clearning cube"
-  message = ""
-  for a in range(0,8):
-    for b in range(0,8):
-      for c in range(0,8):
-        message += translate(a,b,c,0,0,0)
-  sendData(message)
+  cube_reset()
 
   print "starting visulisation"
   main()
