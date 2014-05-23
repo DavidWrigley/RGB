@@ -18,7 +18,7 @@ pixel = 0
 red = 8
 green = 8
 blue = 8
-mode = 3
+mode = 2
 pulsedirection = 1
 
 def connect(IP, Port):

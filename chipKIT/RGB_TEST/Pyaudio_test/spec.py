@@ -15,7 +15,10 @@ import struct
 import wave
 import socket
 import time
+import math
 import random as randint
+import threading
+import termios, fcntl, sys, os
  
 SAVE = 0.0
 TITLE = ''
@@ -36,7 +39,58 @@ TCP_PORT = 8888
 
 #previous dft values
 global prev
-set_point = 30
+global set_point
+mode = 4
+set_point = 6
+max_set_point = 30
+min_set_point = 2
+fd = sys.stdin.fileno()
+
+class keyEvent(threading.Thread):
+
+  def __init__(self):
+    # initilisation
+    self.runvar = 1
+    self.oldterm = termios.tcgetattr(fd)
+    newattr = termios.tcgetattr(fd)
+    newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
+    termios.tcsetattr(fd, termios.TCSANOW, newattr)
+
+    self.oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
+    fcntl.fcntl(fd, fcntl.F_SETFL, self.oldflags | os.O_NONBLOCK)
+
+    threading.Thread.__init__(self, target=self.run)
+  
+  def run(self):
+    global set_point
+    # key press captucre loop
+    try:
+      while self.runvar:
+        time.sleep(.01)
+        try:
+          c = sys.stdin.read(1)
+          #keypress = repr(c)
+          keypress = c
+          print "got: %c" %keypress
+
+          if(keypress == "w"):
+            if(set_point < max_set_point):
+              set_point += 1
+          elif(keypress == "s"):
+            if(set_point > min_set_point):
+              set_point -= 1
+
+          print set_point
+            
+        except IOError: 
+            pass
+    finally:
+      termios.tcsetattr(fd, termios.TCSAFLUSH, self.oldterm)
+      fcntl.fcntl(fd, fcntl.F_SETFL, self.oldflags)
+
+  def terminate(self):
+      # finish the loop
+      self.runvar = 0
 
 def connect(IP, Port):
     """
@@ -87,6 +141,7 @@ def sendData(data):
 def animate(i, line, stream, wf, MAX_y):
  
   global prev
+  global set_point
   # Read n*nFFT frames from stream, n > 0
   N = max(stream.get_read_available() / nFFT, 1) * nFFT
   data = None
@@ -109,73 +164,252 @@ def animate(i, line, stream, wf, MAX_y):
   # Sewing FFT of two channels together, DC part uses right channel's
   Y = abs(np.hstack((Y_L[-nFFT/2:-1], Y_R[:nFFT/2])))
 
-  Y_left = Y[(len(Y)/2):((len(Y)/2)+(len(Y)/4))]
-
-  #print Y_left
-  # sum up the bins to be displayed
-  average_bins = []
-  placeholder = 1
-  increment = len(Y_left)/8
-  for a in range(0,8):
-    average_bins.append(sum(Y_left[placeholder:placeholder+increment]))
-    placeholder = placeholder+increment
-
-  #print average_bins
-
-  # calculate the average power
-  totalSum = 0
-  for a in average_bins:
-    totalSum += a
-
-  average_power = totalSum/len(average_bins)
-  #print "Average Power: " + str(average_power)
-
-  # create message
-  message = ""
-
-  if(len(prev) > 8):
-    prev.pop(0)
-
   colour = [ [8,0,0],
-             [8,2,0],
-             [4,4,0],
-             [0,8,0],
-             [0,4,4],
-             [0,0,8],
-             [3,0,8],
-             [8,0,2] ]
+               [8,2,0],
+               [4,4,0],
+               [0,8,0],
+               [0,4,4],
+               [0,0,8],
+               [3,0,8],
+               [8,0,2] ]
 
-  print colour
+  if(mode == 1):
+    # this mode is histoty dft based (pretty cool)
+    Y_left = Y[(len(Y)/2):((len(Y)/2)+(len(Y)/4))]
 
-  # clear previous info
-  hist = 0;
-  for a in reversed(prev):
+    set_point = 30
+
+    #print Y_left
+    # sum up the bins to be displayed
+    average_bins = []
+    placeholder = 0
+    increment = len(Y_left)/8
+    for a in range(0,8):
+      average_bins.append(sum(Y_left[placeholder:placeholder+increment]))
+      placeholder = placeholder+increment
+
+    #print average_bins
+
+    # calculate the average power
+    totalSum = 0
+    for a in average_bins:
+      totalSum += a
+
+    average_power = totalSum/len(average_bins)
+    print "Average Power: " + str(average_power)
+
+    # create message
+    message = ""
+
+    if(len(prev) > 8):
+      prev.pop(0)
+
+    # clear previous info
+    hist = 0;
+    for a in reversed(prev):
+      row = 0
+      for b in a:
+        level = int(round(b/set_point))
+        if(level > 7):
+          level = 7
+        #print "hist: %d Level: %d Row: %d" %(hist,level,row)
+        message += translate(hist,level,row,0,0,0)
+        if(hist < 7):
+          message += translate(hist+1,level,row,colour[row][0],colour[row][1],colour[row][2])
+        row += 1
+      hist += 1
+
+    # display current data on cube
     row = 0
-    for b in a:
-      level = int(round(b/set_point))
+    for a in average_bins:
+      level = int(round(a/set_point))
       if(level > 7):
         level = 7
-      print "hist: %d Level: %d Row: %d" %(hist,level,row)
-      message += translate(hist,level,row,0,0,0)
-      if(hist < 7):
-        message += translate(hist+1,level,row,colour[row][0],colour[row][1],colour[row][2])
+      #print level
+      message += translate(0,level,row,colour[row][0],colour[row][1],colour[row][2])
       row += 1
-    hist += 1
 
-  # display current data on cube
-  row = 0
-  for a in average_bins:
-    level = int(round(a/set_point))
-    if(level > 7):
-      level = 7
-    #print level
-    message += translate(0,level,row,colour[row][0],colour[row][1],colour[row][2])
-    row += 1
+    sendData(message)
 
-  sendData(message)
+    # set previous state
+    prev.append(average_bins)
 
-  # set previous state
-  prev.append(average_bins)
+  elif(mode == 2):
+    # this mode is complete dft based
+    Y_left = Y[(len(Y)/2):-1]
+    # print len(Y_left)
+
+    # sum up the bins to be displayed
+    average_bins = []
+    placeholder = 0
+    increment = round(len(Y_left)/64)
+    for a in range(0,64):
+      average_bins.append(sum(Y_left[placeholder:placeholder+increment]))
+      placeholder = placeholder+increment
+
+    message = ""
+
+    # reset the previous frame
+    for a in prev:
+      message += translate(a[0],a[1],a[2],0,0,0)
+
+    prev = []
+
+    # send new frame
+    bin = 0
+    for x in range(0,8):
+      for z in range(0,8):
+          level = int(round(average_bins[bin]/set_point))
+          if( level > 7):
+            level = 7
+          if level == 0:
+            setcolour = colour[0]
+          elif level == 1:
+            setcolour = colour[1]
+          elif level == 2:
+            setcolour = colour[2]
+          elif level == 3:
+            setcolour = colour[3]
+          elif level == 4:
+            setcolour = colour[4]
+          elif level == 5:
+            setcolour = colour[5]
+          elif level == 6:
+            setcolour = colour[6]
+          elif level == 7:
+            setcolour = colour[7]
+          message += translate(x,level,z,setcolour[0],setcolour[1],setcolour[2])
+          prev.append([x,level,z])
+          bin += 1
+
+    sendData(message)
+
+  elif(mode == 3):
+    # this mode is complete dft based
+    Y_left = Y[(len(Y)/2):-1]
+    # print len(Y_left)
+
+    print "length: %d"  %len(Y_left)
+
+    # sum up the bins to be displayed
+    average_bins = []
+    placeholder = 0
+    increment = round(len(Y_left)/64)
+    for a in range(0,64):
+      average_bins.append(sum(Y_left[placeholder:placeholder+increment]))
+      placeholder = placeholder+increment
+
+    message = ""
+
+    # reset the previous frame
+    for a in prev:
+      message += translate(a[0],a[1],a[2],0,0,0)
+
+    prev = []
+    # send new frame
+    bin = 0
+
+    # this will get you to the diagonal
+    for x in range(0,8):
+      for z in range(0,x+1):
+          level = int(round(average_bins[bin]/set_point))
+          if( level > 7):
+            level = 7
+          message += translate((x-z),level,z,0,2,8)
+          prev.append([(x-z),level,z])
+          bin += 1
+
+    for rows in range(1,8):
+      count = 0
+      for z in range(rows,8):
+          level = int(round(average_bins[bin]/set_point))
+          if( level > 7):
+            level = 7
+          message += translate((7-count),level,z,0,2,8)
+          prev.append([(7-count),level,z])
+          bin += 1
+          count += 1
+
+    sendData(message)
+
+  elif(mode == 4):
+    # this mode is complete dft based
+    Y_left = Y[(len(Y)/2)-1:(len(Y)/2 + len(Y)/4)]
+
+    # sum up the bins to be displayed
+    average_bins = []
+    placeholder = 0
+    increment = round(len(Y_left)/64)
+    for a in range(0,64):
+      average_bins.append(sum(Y_left[placeholder:placeholder+increment]))
+      placeholder = placeholder+increment
+
+    message = ""
+
+    # reset the previous frame
+    for a in prev:
+      message += translate(a[0],a[1],a[2],0,0,0)
+
+    # reset prev frame, only hold one frame at a time
+    prev = []
+    # send new frame
+    bin = 0
+
+    # this will get you to the diagonal
+    for x in range(0,8):
+      for z in range(0,x+1):
+          level = int(round(average_bins[bin]/set_point))
+          if( level > 7):
+            level = 7
+          if level == 0:
+            setcolour = colour[0]
+          elif level == 1:
+            setcolour = colour[1]
+          elif level == 2:
+            setcolour = colour[2]
+          elif level == 3:
+            setcolour = colour[3]
+          elif level == 4:
+            setcolour = colour[4]
+          elif level == 5:
+            setcolour = colour[5]
+          elif level == 6:
+            setcolour = colour[6]
+          elif level == 7:
+            setcolour = colour[7]
+          message += translate((x-z),level,z,setcolour[0],setcolour[1],setcolour[2])
+          prev.append([(x-z),level,z])
+          bin += 1
+
+    # need to do the other half of the triangle
+    for rows in range(1,8):
+      count = 0
+      for z in range(rows,8):
+          level = int(round(average_bins[bin]/set_point))
+          if( level > 7):
+            level = 7
+          if level == 0:
+            setcolour = colour[0]
+          elif level == 1:
+            setcolour = colour[1]
+          elif level == 2:
+            setcolour = colour[2]
+          elif level == 3:
+            setcolour = colour[3]
+          elif level == 4:
+            setcolour = colour[4]
+          elif level == 5:
+            setcolour = colour[5]
+          elif level == 6:
+            setcolour = colour[6]
+          elif level == 7:
+            setcolour = colour[7]
+          message += translate((7-count),level,z,setcolour[0],setcolour[1],setcolour[2])
+          prev.append([(7-count),level,z])
+          bin += 1
+          count += 1
+
+    sendData(message)
  
   line.set_ydata(Y)
   return line,
@@ -261,6 +495,10 @@ if __name__ == '__main__':
   print "TCP"
   # connect the socket to the microcontroller
   ensure_Connect()
+
+  print "multiplying spiders"
+  thread = keyEvent()
+  thread.start()
 
   print "clearning cube"
   message = ""
