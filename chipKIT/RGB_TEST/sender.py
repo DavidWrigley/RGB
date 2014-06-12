@@ -19,7 +19,7 @@ red = 8
 green = 8
 blue = 8
 global mode
-mode = 0
+mode = 1
 pulsedirection = 1
 
 def connect(IP, Port):
@@ -106,7 +106,7 @@ if __name__ == '__main__':
             # Pulse.
             if(mode == 1): 
                 print "Pulse" + str(red) + str(green) + str(blue)  
-                time.sleep(.1)
+                time.sleep(.01)
                 for a in range(0,512):     
                     if(pixel == 64):
                         layer += 1

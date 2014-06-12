@@ -4,6 +4,7 @@
 #
 # Deps: PyAudio, NumPy, and Matplotlib
 # Blog: http://blog.yjl.im/2012/11/frequency-spectrum-of-sound-using.html
+# adapted by David Wrigley
  
 import numpy as np
 import matplotlib
@@ -22,7 +23,7 @@ import termios, fcntl, sys, os
  
 SAVE = 0.0
 TITLE = ''
-FPS = 30.0
+FPS = 60.0
  
 #nFFT = 64
 nFFT = 512
@@ -41,7 +42,7 @@ TCP_PORT = 8888
 global prev
 global set_point
 global mode
-mode = 1
+mode = 5
 set_point = 6
 max_set_point = 40
 min_set_point = 1
@@ -105,6 +106,14 @@ class keyEvent(threading.Thread):
             prev = []
           elif(keypress == "4"):
             mode = 4
+            cube_reset()
+            prev = []
+          elif(keypress == "5"):
+            mode = 5
+            cube_reset()
+            prev = []
+          elif(keypress == "6"):
+            mode = 6
             cube_reset()
             prev = []
 
@@ -254,6 +263,7 @@ def animate(i, line, stream, wf, MAX_y):
           bin += 1
 
     sendData(message)
+  
   elif(mode == 2):
     # this mode is complete dft based
     Y_left = Y[(len(Y)/2)-1:(len(Y)/2 + len(Y)/4)]
@@ -306,6 +316,57 @@ def animate(i, line, stream, wf, MAX_y):
 
   elif(mode == 3):
     # this mode is complete dft based
+    Y_left = Y[(len(Y)/2)-1:(len(Y)/2 + len(Y)/4)]
+    # print len(Y_left)
+
+    # sum up the bins to be displayed
+    average_bins = []
+    placeholder = 0
+    increment = round(len(Y_left)/64)
+    for a in range(0,64):
+      average_bins.append(sum(Y_left[placeholder:placeholder+increment]))
+      placeholder = placeholder+increment
+
+    message = ""
+
+    # reset the previous frame
+    for a in prev:
+      message += translate(a[0],a[1],a[2],0,0,0)
+
+    prev = []
+
+    # send new frame
+    bin = 0
+    for x in range(0,8):
+      for z in range(0,8):
+          level = int(round(average_bins[bin]/set_point))
+          for a in range(level-1,-1,-1):
+            if( a > 7):
+              a = 7
+            if a == 0:
+              setcolour = colour[0]
+            elif a == 1:
+              setcolour = colour[1]
+            elif a == 2:
+              setcolour = colour[2]
+            elif a == 3:
+              setcolour = colour[3]
+            elif a == 4:
+              setcolour = colour[4]
+            elif a == 5:
+              setcolour = colour[5]
+            elif a == 6:
+              setcolour = colour[6]
+            elif a == 7:
+              setcolour = colour[7]
+            message += translate(x,a,z,setcolour[0],setcolour[1],setcolour[2])
+            prev.append([x,a,z])
+          bin += 1
+
+    sendData(message)
+
+  elif(mode == 4):
+    # this mode is complete dft based
     Y_left = Y[(len(Y)/2):-1]
 
     # sum up the bins to be displayed
@@ -349,7 +410,7 @@ def animate(i, line, stream, wf, MAX_y):
 
     sendData(message)
 
-  elif(mode == 4):
+  elif(mode == 5):
     # this mode is complete dft based
     Y_left = Y[(len(Y)/2)-1:(len(Y)/2 + len(Y)/4)]
 
@@ -427,8 +488,90 @@ def animate(i, line, stream, wf, MAX_y):
           count += 1
 
     sendData(message)
+
+
+  elif(mode == 6):
+    # this mode is complete dft based
+    Y_left = Y[(len(Y)/2)-1:(len(Y)/2 + len(Y)/4)]
+
+    # sum up the bins to be displayed
+    average_bins = []
+    placeholder = 0
+    increment = round(len(Y_left)/64)
+    for a in range(0,64):
+      average_bins.append(sum(Y_left[placeholder:placeholder+increment]))
+      placeholder = placeholder+increment
+
+    message = ""
+
+    # reset the previous frame
+    for a in prev:
+      message += translate(a[0],a[1],a[2],0,0,0)
+
+    # reset prev frame, only hold one frame at a time
+    prev = []
+    # send new frame
+    bin = 0
+
+    # this will get you to the diagonal
+    for x in range(0,8):
+      for z in range(0,x+1):
+          level = int(round(average_bins[bin]/set_point))
+          for a in range(level-1,-1,-1):
+            if( a > 7):
+              a = 7
+            if a == 0:
+              setcolour = colour[0]
+            elif a == 1:
+              setcolour = colour[1]
+            elif a == 2:
+              setcolour = colour[2]
+            elif a == 3:
+              setcolour = colour[3]
+            elif a == 4:
+              setcolour = colour[4]
+            elif a == 5:
+              setcolour = colour[5]
+            elif a == 6:
+              setcolour = colour[6]
+            elif a == 7:
+              setcolour = colour[7]
+            message += translate((x-z),a,z,setcolour[0],setcolour[1],setcolour[2])
+            prev.append([(x-z),a,z])
+          bin += 1
+
+    # need to do the other half of the triangle
+    for rows in range(1,8):
+      count = 0
+      for z in range(rows,8):
+          level = int(round(average_bins[bin]/set_point))
+          for a in range(level-1,-1,-1):
+            if( a > 7):
+              a = 7
+            if a == 0:
+              setcolour = colour[0]
+            elif a == 1:
+              setcolour = colour[1]
+            elif a == 2:
+              setcolour = colour[2]
+            elif a == 3:
+              setcolour = colour[3]
+            elif a == 4:
+              setcolour = colour[4]
+            elif a == 5:
+              setcolour = colour[5]
+            elif a == 6:
+              setcolour = colour[6]
+            elif a == 7:
+              setcolour = colour[7]
+            message += translate((7-count),a,z,setcolour[0],setcolour[1],setcolour[2])
+            prev.append([(7-count),a,z])
+          bin += 1
+          count += 1
+
+    sendData(message)
  
-  line.set_ydata(Y)
+  #line.set_ydata(Y)
   return line,
  
 def init(line):

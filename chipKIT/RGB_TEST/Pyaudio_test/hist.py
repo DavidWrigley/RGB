@@ -4,6 +4,7 @@
 #
 # Deps: PyAudio, NumPy, and Matplotlib
 # Blog: http://blog.yjl.im/2012/11/frequency-spectrum-of-sound-using.html
+# adapted by David Wrigley
  
 import numpy as np
 import matplotlib

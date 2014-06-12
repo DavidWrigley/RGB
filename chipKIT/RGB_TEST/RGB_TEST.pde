@@ -24,7 +24,6 @@
  * Global Varables
  */
 // Ethernet 
-// byte ip[] = { 192,168,1,190 };
 byte mac[] = { 0x01, 0x23, 0x45, 0x67, 0x8A, 0xBC };
 byte gateway[] = { 192,168,1, 1 };
 byte subnet[] = { 255, 255, 255, 0 };
@@ -189,22 +188,6 @@ void loop() {
                 // ignore it
                 // Serial.println("Bad");
             }
-            
-/*
-            Serial.print("i: ");
-            Serial.print(i,DEC);
-            Serial.print(" RL: ");
-            Serial.print(readLayer,DEC);
-            Serial.print(" RP: ");
-            Serial.print(readPixel,DEC);
-            Serial.print(" R: ");
-            Serial.print(readRed,DEC);
-            Serial.print(" G: ");
-            Serial.print(readGreen,DEC);
-            Serial.print(" B: ");
-            Serial.print(readBlue,DEC);
-            Serial.println("");
-*/
         }
     }
 }
@@ -328,7 +311,6 @@ uint32_t bamCallback(uint32_t currentTime) {
     }
     //interrupts();
     return (currentTime + CORE_TICK_RATE*.2);
-    // return (currentTime + CORE_TICK_RATE*200);
 }
 
 /**
@@ -339,11 +321,7 @@ uint32_t bamCallback(uint32_t currentTime) {
  * @return             dito from above
  */
 uint32_t layerCallback(uint32_t currentTime) {
-
-    // TODO: replace this with direct access to the pins, not using digital write
-    // also the mosfet will operate the other way, meaning. when the layer is low
-    // the mosfet will be active, need to slow down all the timers and observe.
-
+    
     if(layerPossitionCounter == 8) {
         layerPossitionCounter = 0;
     }
@@ -353,8 +331,6 @@ uint32_t layerCallback(uint32_t currentTime) {
     spiBlue = 0;
     // force the colour high, as it may still be low from last layer
     SpiSend(0x0000000000000000,0x0000000000000000,0x0000000000000000);
-    // LATESET = pinOE;
-    // SpiSend(0xFFFFFFFFFFFFFFFF,0xFFFFFFFFFFFFFFFF,0xFFFFFFFFFFFFFFFF);
 
     // turn off the last layer
     if(layerPossitionCounter == 0) {
@@ -365,19 +341,6 @@ uint32_t layerCallback(uint32_t currentTime) {
 
     // eneable the next layer
     digitalWrite(layerArray[layerPossitionCounter], 0);
-    // LATECLR = pinOE;
-
-    /* HOME TEST
-    // turn off the last layer HOME TEST
-    if(layerPossitionCounter == 0) {
-        digitalWrite(layerArray[7], 0);
-    } else {
-        digitalWrite(layerArray[(layerPossitionCounter - 1)], 0);
-    }
-
-    // eneable the next layer
-    digitalWrite(layerArray[layerPossitionCounter], 1);
-    */
 
     // reset the BAM counter
     colourcounter = 0;
@@ -385,7 +348,6 @@ uint32_t layerCallback(uint32_t currentTime) {
     // increment
     layerPossitionCounter++;       
     return (currentTime + CORE_TICK_RATE*1.6);
-    // return (currentTime + CORE_TICK_RATE*1600);
 }
 
 extern "C"

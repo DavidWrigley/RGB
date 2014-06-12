@@ -5,7 +5,7 @@ import time
 import signal
 import sys
 import curses
-from random import randint
+import random
 import threading
 import termios, fcntl, sys, os
 
@@ -17,6 +17,7 @@ BUFFER_SIZE = 1024
 
 #global varables
 fd = sys.stdin.fileno()
+allSnake = []
 currentSnake = []
 currentPellet = []
 score = 0
@@ -25,6 +26,9 @@ global snakeDirection
 
 snakeDirection = [0,1,0]
 keypress = ''
+randomdir = 1
+updatetime = .1
+randomlimit = .5
 
 layer = 0
 pixel = 0
@@ -42,6 +46,103 @@ def connect(IP, Port):
     except socket.timeout:
         time.sleep(4)
         return 1
+
+def random_choose():
+    while(True):
+        print "running random snake"
+        timesleep = random.uniform(0,randomlimit)
+        time.sleep(timesleep)
+        keypress = random.randint(0,6)
+        print "sleep: %f, Keypress: %d" %(timesleep,keypress)
+        #if its going in the x direction it can go in the y or z
+        if(snakeDirection[0] != 0):
+            if(keypress == 0):
+                # controls y upward direction
+                if(snakeDirection[1] == 0):
+                    snakeDirection[0] = 0
+                    snakeDirection[1] = 1
+                    snakeDirection[2] = 0
+        
+            elif(keypress == 1):
+                # controls y downward direction
+                if(snakeDirection[1] == 0):
+                    snakeDirection[0] = 0
+                    snakeDirection[1] = -1
+                    snakeDirection[2] = 0
+
+            elif(keypress == 2):
+                # controls z positive direction                            
+                if(snakeDirection[2] == 0):
+                    snakeDirection[0] = 0
+                    snakeDirection[1] = 0
+                    snakeDirection[2] = 1
+
+            elif(keypress == 3):
+                # controls z negative direction                            
+                if(snakeDirection[2] == 0):
+                    snakeDirection[0] = 0
+                    snakeDirection[1] = 0
+                    snakeDirection[2] = -1
+
+        #if the snake is going in the y direction can go in x and z
+        elif(snakeDirection[1] != 0):
+            if(keypress == 2):
+                # controls z positive direction                            
+                if(snakeDirection[2] == 0):
+                    snakeDirection[0] = 0
+                    snakeDirection[1] = 0
+                    snakeDirection[2] = 1
+
+            elif(keypress == 3):
+                # controls z negative direction                            
+                if(snakeDirection[2] == 0):
+                    snakeDirection[0] = 0
+                    snakeDirection[1] = 0
+                    snakeDirection[2] = -1
+            
+            elif(keypress == 4):
+                # controls x positive direction                            
+                if(snakeDirection[0] == 0):
+                    snakeDirection[0] = 1
+                    snakeDirection[1] = 0
+                    snakeDirection[2] = 0
+
+            elif(keypress == 5):
+                # controls z positive direction                            
+                if(snakeDirection[0] == 0):
+                    snakeDirection[0] = -1
+                    snakeDirection[1] = 0
+                    snakeDirection[2] = 0
+
+        elif(snakeDirection[2] != 0):
+            if(keypress == 4):
+                # controls x positive direction                            
+                if(snakeDirection[0] == 0):
+                    snakeDirection[0] = 1
+                    snakeDirection[1] = 0
+                    snakeDirection[2] = 0
+
+            elif(keypress == 5):
+                # controls z positive direction                            
+                if(snakeDirection[0] == 0):
+                    snakeDirection[0] = -1
+                    snakeDirection[1] = 0
+                    snakeDirection[2] = 0
+
+            elif(keypress == 0):
+                # controls y upward direction
+                if(snakeDirection[1] == 0):
+                    snakeDirection[0] = 0
+                    snakeDirection[1] = 1
+                    snakeDirection[2] = 0
+        
+            elif(keypress == 1):
+                # controls y downward direction
+                if(snakeDirection[1] == 0):
+                    snakeDirection[0] = 0
+                    snakeDirection[1] = -1
+                    snakeDirection[2] = 0
+
 
 def signal_handler(signum, frame):
     """
@@ -182,7 +283,7 @@ class keyEvent(threading.Thread):
                                 snakeDirection[2] = 0
 
                     #print "DIR: %d, %d, %d"  %(snakeDirection[0], snakeDirection[1], snakeDirection[2])
-                    
+                
                 except IOError: 
                     pass
         finally:
@@ -259,12 +360,23 @@ if __name__ == '__main__':
 
     print "feeding snake"
 
+    #allSnake.append([[2,0,0],[1,0,0],[0,0,0]])
     currentSnake.append([2,0,0])
     currentSnake.append([1,0,0])
     currentSnake.append([0,0,0])
+    if(randomdir == 1):
+        #allSnake.append([[1,3,7],[3,0,1],[4,1,2]])
+        #allSnake.append([[3,6,0],[1,4,2],[2,5,1]])
+        #allSnake.append([[3,3,7],[3,2,1],[1,5,3]])
+        pass
 
     print "making pellet"
-    currentPellet = [randint(0,7),randint(0,7),randint(0,7)]
+    currentPellet = [random.randint(0,7),random.randint(0,7),random.randint(0,7)]
+
+    if(randomdir == 1):
+        print "randoming"
+        target_thread = threading.Thread(target=random_choose)
+        target_thread.start()
 
     while True:
         """
@@ -320,7 +432,7 @@ if __name__ == '__main__':
                     for a in range(0,8):
                         for b in range(0,8):
                             for c in range(0,8):
-                                message += translate(a,c,b,randint(0,8),randint(0,8),randint(0,8))
+                                message += translate(a,c,b,random.randint(0,8),random.randint(0,8),random.randint(0,8))
                             time.sleep(.01)
                             sendData(message)
                             message = ""
@@ -337,7 +449,7 @@ if __name__ == '__main__':
         if(currentPellet == currentSnake[0]):
             # if you get the pellet do not zero out the pixel and allow the snake to extend
             # make a new pellet
-            currentPellet = [randint(0,7),randint(0,7),randint(0,7)]
+            currentPellet = [random.randint(0,7),random.randint(0,7),random.randint(0,7)]
             score += 1
             pass
         else:
@@ -359,6 +471,4 @@ if __name__ == '__main__':
 
         # send the data
         sendData(message)
-        time.sleep(.4)   
-    
-    
+        time.sleep(updatetime)   

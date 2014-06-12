@@ -100,23 +100,6 @@ def animate(i, line, stream, wf, MAX_y):
 
 		print "Value: " + str(value)
 
-		"""
-		if(value == .002*scale):
-			limiter = 1
-		elif(value >= .002*scale and value <= .004*scale):
-			limiter = 2
-		elif(value >= .004*scale and value <= .008*scale):
-			limiter = 3
-		elif(value >= .008*scale and value <= .016*scale):
-			limiter = 4
-		elif(value >= .016*scale and value <= .032*scale):
-			limiter = 5
-		elif(value >= .032*scale and value <= .064*scale):
-			limiter = 6
-		elif(value >= .064*scale and value <= .128*scale):
-			limiter = 7
-		"""
-
 		if(value > 7.0):
 			limiter = 7
 		else:
